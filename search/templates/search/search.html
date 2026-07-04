@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static wagtailcore_tags %}
+
+{% block body_class %}template-searchresults{% endblock %}
+
+{% block title %}Cautare{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Intranet SmartBill</p>
+        <h1>Cautare</h1>
+    </section>
+
+    <form class="search-form" action="{% url 'search' %}" method="get">
+        <input type="text" name="query"{% if search_query %} value="{{ search_query }}"{% endif %} placeholder="Cauta in intranet">
+        <button type="submit">Cauta</button>
+    </form>
+
+    {% if search_results %}
+        <div class="result-list">
+            {% for result in search_results %}
+                <a class="result-item" href="{% pageurl result %}">
+                    <strong>{{ result }}</strong>
+                    {% if result.search_description %}
+                        <span>{{ result.search_description }}</span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if search_results.has_previous %}
+                <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Anterior</a>
+            {% endif %}
+
+            {% if search_results.has_next %}
+                <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Urmator</a>
+            {% endif %}
+        </div>
+    {% elif search_query %}
+        <p class="empty-state">Nu am gasit rezultate.</p>
+    {% endif %}
+</div>
+{% endblock %}
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+{% if search_results.has_previous %}
+<a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Previous</a>
+{% endif %}
+
+{% if search_results.has_next %}
+<a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Next</a>
+{% endif %}
+{% elif search_query %}
+No results found
+{% endif %}
+{% endblock %}

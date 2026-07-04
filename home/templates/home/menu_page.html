@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<div class="page-shell">
+
+    <div class="breadcrumbs">
+        {% for ancestor in page.get_ancestors.live %}
+            {% if not ancestor.is_root %}
+                <a href="{% pageurl ancestor %}">{{ ancestor.title }}</a>
+                <span>/</span>
+            {% endif %}
+        {% endfor %}
+        <span>{{ page.title }}</span>
+    </div>
+
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Sectiune intranet</p>
+        <h1>{{ page.title }}</h1>
+
+        {% if page.intro %}
+            <p class="page-intro">{{ page.intro }}</p>
+        {% endif %}
+    </section>
+
+    {% if page.documents.all %}
+        <h2>Documente</h2>
+
+        <div class="card-grid">
+            {% for item in page.documents.all %}
+                {% if item.document %}
+                    <a class="content-card" href="{{ item.document.url }}" target="_blank" rel="noopener">
+                        <span>{{ item.title }}</span>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if children %}
+        <h2>Subsectiuni</h2>
+
+        <div class="card-grid">
+            {% for child in children %}
+                <a class="content-card" href="{% pageurl child %}">
+                    <span>{{ child.title }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

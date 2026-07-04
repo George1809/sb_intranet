@@ -1,0 +1,4 @@
+wagtail
+psycopg[binary]
+python-dotenv
+gunicorn
