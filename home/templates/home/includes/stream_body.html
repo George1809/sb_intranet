@@ -1,0 +1,53 @@
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% for block in body %}
+    {% if block.block_type == "heading" %}
+        <h2>{{ block.value }}</h2>
+    {% elif block.block_type == "paragraph" %}
+        <div class="manual-richtext">
+            {{ block.value|richtext }}
+        </div>
+    {% elif block.block_type == "image" %}
+        {% image block.value width-1200 as stream_image %}
+        <figure class="manual-image">
+            <img src="{{ stream_image.url }}" width="{{ stream_image.width }}" height="{{ stream_image.height }}" alt="{{ block.value.title }}">
+            <figcaption>{{ block.value.title }}</figcaption>
+        </figure>
+    {% elif block.block_type == "video" %}
+        <div class="manual-embed">
+            {% include_block block %}
+        </div>
+    {% elif block.block_type == "video_upload" %}
+        <figure class="manual-video">
+            <video controls preload="metadata">
+                <source src="{{ block.value.url }}">
+                Browserul nu poate reda acest fisier video.
+            </video>
+            <figcaption>{{ block.value.title }}</figcaption>
+        </figure>
+    {% elif block.block_type == "document" %}
+        <a class="resource-button resource-button--document" href="{{ block.value.url }}" target="_blank" rel="noopener">
+            <span class="resource-button__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Zm0-8h4v2H8V8Z"/>
+                </svg>
+            </span>
+            <span class="resource-button__content">
+                <strong>{{ block.value.title }}</strong>
+                <small>Deschide documentul</small>
+            </span>
+        </a>
+    {% elif block.block_type == "link" %}
+        <a class="resource-button resource-button--link" href="{{ block.value.url }}" target="_blank" rel="noopener">
+            <span class="resource-button__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M10.6 13.4a1 1 0 0 1 0-1.4l3.6-3.6a3 3 0 1 1 4.2 4.2l-2.1 2.1 1.4 1.4 2.1-2.1a5 5 0 0 0-7.1-7.1l-3.5 3.6a3 3 0 0 0 0 4.2l1.4-1.3Zm2.8-2.8a1 1 0 0 1 0 1.4l-3.6 3.6a3 3 0 1 1-4.2-4.2l2.1-2.1-1.4-1.4-2.1 2.1a5 5 0 0 0 7.1 7.1l3.5-3.6a3 3 0 0 0 0-4.2l-1.4 1.3Z"/>
+                </svg>
+            </span>
+            <span class="resource-button__content">
+                <strong>{{ block.value.title }}</strong>
+                <small>{{ block.value.description|default:"Deschide linkul" }}</small>
+            </span>
+        </a>
+    {% endif %}
+{% endfor %}

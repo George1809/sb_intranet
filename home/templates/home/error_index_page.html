@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<div class="page-shell">
+
+    <div class="breadcrumbs">
+        {% for ancestor in page.get_ancestors.live %}
+            {% if not ancestor.is_root %}
+                <a href="{% pageurl ancestor %}">{{ ancestor.title }}</a>
+                <span>/</span>
+            {% endif %}
+        {% endfor %}
+        <span>{{ page.title }}</span>
+    </div>
+
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Suport</p>
+        <h1>{{ page.title }}</h1>
+        {% if page.intro %}
+            <p class="page-intro">{{ page.intro }}</p>
+        {% endif %}
+    </section>
+
+    {% if entries %}
+        <section class="resource-section">
+            <h2>Situatii documentate</h2>
+            <div class="resource-list">
+                {% for entry in entries %}
+                    <a class="resource-button resource-button--error" href="{% pageurl entry %}">
+                        <span class="resource-button__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M12 2 1 21h22L12 2Zm0 6a1 1 0 0 1 1 1v5a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1Zm0 9.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z"/>
+                            </svg>
+                        </span>
+                        <span class="resource-button__content">
+                            <strong>{{ entry.title }}</strong>
+                            <small>{{ entry.description|default:"Vezi detalii" }}</small>
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% else %}
+        <p class="empty-state">Nu exista inca situatii documentate in aceasta sectiune.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

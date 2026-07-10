@@ -14,8 +14,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = PROJECT_DIR.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -123,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ro"
 
 TIME_ZONE = "UTC"
 
@@ -175,22 +179,59 @@ WAGTAIL_SITE_NAME = "config"
 WAGTAILSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "wagtail.search.backends.database",
+        # Fara asta, Postgres foloseste config-ul implicit al bazei de date
+        # (english) pentru stemming - gresit pentru continut in romana.
+        "SEARCH_CONFIG": "romanian",
     }
 }
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
-# e.g. in notification emails. Don't include '/admin' or a trailing slash
-WAGTAILADMIN_BASE_URL = "http://example.com"
+# e.g. in notification emails. Don't include '/admin' or a trailing slash.
+# Pe server real, se pune domeniul real in .env (WAGTAILADMIN_BASE_URL).
+WAGTAILADMIN_BASE_URL = os.getenv("WAGTAILADMIN_BASE_URL", "http://localhost:8000")
 
 # Allowed file extensions for documents in the document library.
 # This can be omitted to allow all files, but note that this may present a security risk
 # if untrusted users are allowed to upload files -
 # see https://docs.wagtail.org/en/stable/advanced_topics/deploying.html#user-uploaded-files
-WAGTAILDOCS_EXTENSIONS = ['csv', 'docx', 'key', 'odt', 'pdf', 'pptx', 'rtf', 'txt', 'xlsx', 'zip']
+WAGTAILDOCS_EXTENSIONS = [
+    'csv',
+    'docx',
+    'key',
+    'm4v',
+    'mov',
+    'mp4',
+    'odt',
+    'pdf',
+    'pptx',
+    'rtf',
+    'txt',
+    'webm',
+    'xlsx',
+    'zip',
+]
 
 # Maximum upload size for documents in bytes.
-WAGTAILDOCS_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+WAGTAILDOCS_MAX_UPLOAD_SIZE = 200 * 1024 * 1024  # 200MB
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "login"
+
+
+# Email
+# Fara EMAIL_HOST setat in .env, cade automat pe consola (safe pentru dev).
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend"
+    if not os.getenv("EMAIL_HOST")
+    else "home.mail.ResilientSMTPEmailBackend",
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "SmartBill Intranet <no-reply@smartbill.ro>")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL

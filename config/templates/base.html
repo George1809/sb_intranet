@@ -16,6 +16,7 @@
         <meta name="description" content="{{ page.search_description }}" />
         {% endif %}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/png" href="{% static 'img/favi.png' %}">
 
         {# Force all links in the live preview panel to be opened in a new tab #}
         {% if request.in_preview_panel %}
@@ -23,7 +24,6 @@
         {% endif %}
 
         {# Global stylesheets #}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/config.css' %}">
         <link rel="stylesheet" href="{% static 'css/sb.css' %}">
 
         {% block extra_css %}
@@ -32,81 +32,129 @@
     </head>
 
     <body class="{% block body_class %}{% endblock %}">
-        {% wagtailuserbar %}
+        {% comment %} {% wagtailuserbar %} {% endcomment %}
 
         <div class="site-frame">
             {% if request.user.is_authenticated %}
                 <header class="site-header">
                     <a class="brand" href="/" aria-label="SmartBill intranet">
-                        <img src="{% static 'img/sb-logo-19-ani.svg' %}" alt="SmartBill">
+                        <img src="{% static 'img/sb_logo_green.png' %}" alt="SmartBill">
                     </a>
 
-                    <nav class="main-nav" aria-label="Meniu principal">
-                        {% for item in main_menu_pages %}
-                            <a href="{% pageurl item %}" {% if request.path == item.url %}class="is-active"{% endif %}>
-                                {{ item.title }}
-                            </a>
-                        {% endfor %}
-                    </nav>
+                    <div class="header-actions">
+                        <nav class="main-nav" aria-label="Meniu principal">
+                            {% for item in main_menu_pages %}
+                                <a href="{% pageurl item %}" {% if request.path == item.url %}class="is-active"{% endif %}>
+                                    {{ item.title }}
+                                </a>
+                            {% endfor %}
+                        </nav>
 
-                    <details class="user-menu">
-                        <summary aria-label="Meniu utilizator">
-                            <span class="user-avatar" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" focusable="false">
-                                    <path d="M12 12c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5Zm0 2c-4.4 0-8 2.4-8 5.3V22h16v-2.7c0-2.9-3.6-5.3-8-5.3Z"/>
-                                </svg>
-                            </span>
-                        </summary>
+                        <div class="user-menu">
+                            <button class="user-menu__trigger" type="button" popovertarget="user-menu-popover" aria-label="Meniu utilizator">
+                                <span class="user-avatar user-avatar--image" aria-hidden="true">
+                                    <img src="{{ user_avatar_url }}" alt="">
+                                </span>
+                                {% comment %}
+                                Varianta fara imagine:
+                                <span class="user-avatar" aria-hidden="true">
+                                    {{ request.user.get_full_name|default:request.user.username|first|upper }}
+                                </span>
+                                {% endcomment %}
+                            </button>
 
-                        <div class="user-dropdown">
-                            <div class="user-dropdown__identity">
-                                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-                                <span>{{ request.user.email|default:"Cont intranet" }}</span>
+                            <div class="user-dropdown" id="user-menu-popover" popover>
+                                <div class="user-dropdown__identity">
+                                    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                                    <span>{{ request.user.email|default:"Cont intranet" }}</span>
+                                </div>
+                                {% if can_access_admin %}
+                                <a href="{% url 'wagtailadmin_home' %}" target="_blank" rel="noopener">
+                                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                        <path d="M12 2 3 6v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V6l-9-4Zm0 2.2 7 3.1V12c0 4-3 8-7 9.1C8 20 5 16 5 12V7.3l7-3.1ZM11 7v4H7v2h4v4h2v-4h4v-2h-4V7h-2Z"/>
+                                    </svg>
+                                    <span>Acces admin</span>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'personal_space' %}">
+                                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                        <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.4-8 5.3V21h16v-1.7C20 16.4 16.4 14 12 14Z"/>
+                                    </svg>
+                                    <span>Spatiul meu</span>
+                                </a>
+                                <a href="{% url 'password_change' %}">
+                                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                        <path d="M17 9V7A5 5 0 0 0 7 7v2H5v13h14V9h-2ZM9 7a3 3 0 0 1 6 0v2H9V7Zm4 10.7V19h-2v-1.3a2 2 0 1 1 2 0Z"/>
+                                    </svg>
+                                    <span>Schimba parola</span>
+                                </a>
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit">
+                                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                            <path d="M4 3h9v2H6v14h7v2H4V3Zm12.6 5.4L21.2 13l-4.6 4.6-1.4-1.4 2.2-2.2H10v-2h7.4l-2.2-2.2 1.4-1.4Z"/>
+                                        </svg>
+                                        <span>Deconectare</span>
+                                    </button>
+                                </form>
                             </div>
-                            <a href="{% url 'personal_space' %}">Spatiul meu</a>
-                            <a href="{% url 'password_change' %}">Schimba parola</a>
-                            <form action="{% url 'logout' %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit">Deconectare</button>
-                            </form>
                         </div>
-                    </details>
+                    </div>
                 </header>
             {% endif %}
 
-            <main class="site-main">
-                {% if messages %}
-                    <div class="messages">
-                        {% for message in messages %}
-                            <div class="message message-{{ message.tags }}">{{ message }}</div>
-                        {% endfor %}
-                    </div>
+            <div class="site-content">
+                <main class="site-main">
+                    {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                <div class="message message-{{ message.tags }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% block content %}{% endblock %}
+                </main>
+
+                {% if request.user.is_authenticated %}
+                    <footer class="site-footer">
+                        <div class="footer-inner">
+                            <a class="footer-brand" href="/" aria-label="SmartBill intranet">
+                                <img src="{% static 'img/sb_logo_green.png' %}" alt="SmartBill">
+                            </a>
+
+                            <nav class="footer-links" aria-label="Linkuri utile">
+                                <a href="https://www.youtube.com/c/SmartBillRomania" target="_blank" rel="noopener">
+                                    <svg class="footer-icon footer-icon--youtube" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                        <path d="M21.6 7.2s-.2-1.5-.9-2.2c-.8-.9-1.8-.9-2.2-1C15.4 3.8 12 3.8 12 3.8s-3.4 0-6.5.2c-.4.1-1.4.1-2.2 1-.7.7-.9 2.2-.9 2.2S2.2 9 2.2 10.8v1.7c0 1.8.2 3.6.2 3.6s.2 1.5.9 2.2c.8.9 1.9.9 2.4 1 1.7.2 6.3.2 6.3.2s3.4 0 6.5-.3c.4 0 1.4-.1 2.2-1 .7-.7.9-2.2.9-2.2s.2-1.8.2-3.6v-1.7c0-1.8-.2-3.6-.2-3.6ZM10.2 14.7V8.5l5.8 3.1-5.8 3.1Z"/>
+                                    </svg>
+                                    <strong>Channel SmartBill</strong>
+                                </a>
+                                <a href="https://www.facebook.com/FacturareSmartBill" target="_blank" rel="noopener">
+                                    <svg class="footer-icon footer-icon--facebook" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                        <path d="M13.1 20v-7h2.3l.4-2.8h-2.7V8.4c0-.8.3-1.4 1.5-1.4H16V4.5c-.7-.1-1.4-.1-2-.1-2.6 0-4.3 1.6-4.3 4.5v1.3H7.4V13h2.3v7h3.4Z"/>
+                                    </svg>
+                                    <strong>Social SmartBill</strong>
+                                </a>
+                                <a href="https://ajutor.smartbill.ro/" target="_blank" rel="noopener">
+                                    <svg class="footer-icon footer-icon--guide" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                        <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 4h8V5H8v2Zm0 3h8V8.5H8V10Zm0 3h8v-1.5H8V13Zm0 3h6v-1.5H8V16Z"/>
+                                    </svg>
+                                    <strong>Ghid SmartBill</strong>
+                                </a>
+                                <span class="footer-user">
+                                    <svg class="footer-icon footer-icon--user" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                        <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.4-8 5.3V21h16v-1.7C20 16.4 16.4 14 12 14Z"/>
+                                    </svg>
+                                    <strong>Logat ca:</strong>
+                                    <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+                                </span>
+                            </nav>
+                        </div>
+                    </footer>
                 {% endif %}
-
-                {% block content %}{% endblock %}
-            </main>
-
-            {% if request.user.is_authenticated %}
-                <footer class="site-footer">
-                    <div>
-                        <strong>Ghid SmartBill</strong>
-                        <span>Resurse interne si proceduri utile.</span>
-                    </div>
-                    <div>
-                        <strong>Social</strong>
-                        <span>Comunitate, noutati si echipa.</span>
-                    </div>
-                    <div>
-                        <strong>Logat ca</strong>
-                        <span>{{ request.user.get_full_name|default:request.user.username }}</span>
-                    </div>
-                </footer>
-            {% endif %}
+            </div>
         </div>
-
-        {# Global javascript #}
-        <script type="text/javascript" src="{% static 'js/config.js' %}"></script>
-
         {% block extra_js %}
         {# Override this in templates to add extra javascript #}
         {% endblock %}

@@ -1,0 +1,11 @@
+{% load static %}
+
+<div class="auth-brand">
+    <img class="auth-logo" src="{% static 'img/sb_logo_green.png' %}" alt="SmartBill">
+    <div>
+        <strong>SmartBill Intranet</strong>
+        {% if auth_subtitle %}
+            <span>{{ auth_subtitle }}</span>
+        {% endif %}
+    </div>
+</div>
