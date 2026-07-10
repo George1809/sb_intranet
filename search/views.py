@@ -9,6 +9,8 @@ from home.models import (
     MenuPageImage,
     MenuPageLink,
     MenuPageManualResource,
+    PersonalSpaceIndexPage,
+    PersonalSpacePage,
 )
 
 # To enable logging of search queries for use with the "Promoted search results" module
@@ -20,7 +22,15 @@ from home.models import (
 
 
 def _page_results(search_query):
-    pages = Page.objects.live().public().search(search_query)
+    # Spatiile personale sunt private (fiecare user le vede doar pe ale lui
+    # in admin) - nu trebuie sa apara nici in cautarea globala, altfel un
+    # user ar putea gasi titlul spatiului altcuiva doar cautand un nume.
+    pages = (
+        Page.objects.live()
+        .public()
+        .not_type(PersonalSpacePage, PersonalSpaceIndexPage)
+        .search(search_query)
+    )
     return [
         {
             "kind": "page",

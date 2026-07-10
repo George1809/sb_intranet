@@ -1,3 +1,6 @@
+from django.db.models import Q
+from django.http import HttpResponseForbidden
+
 from wagtail import hooks
 from wagtail.models import TaskState, WorkflowState
 from wagtail.signals import (
@@ -6,6 +9,8 @@ from wagtail.signals import (
     workflow_rejected,
     workflow_submitted,
 )
+
+from home.models import PersonalSpaceIndexPage, PersonalSpacePage
 
 # Oprite temporar notificarile automate prin email la submit/aprobare/
 # respingere in workflow, cat timp testam manual fluxul de moderare.
@@ -42,3 +47,44 @@ def hide_reports_for_limited_users(request, menu_items):
     """
     if not request.user.is_superuser:
         menu_items.clear()
+
+
+@hooks.register("construct_explorer_page_queryset")
+def hide_other_users_personal_spaces(parent_page, pages, request):
+    """
+    In lista de pagini din admin, un user obisnuit trebuie sa vada doar
+    propriul spatiu personal, nu si pe ale colegilor - desi toate stau in
+    acelasi subarbore (Spatii personale), la care grupul "Angajati" are
+    acces. Superuserii vad tot, ca de obicei.
+    """
+    if request.user.is_superuser:
+        return pages
+
+    if isinstance(parent_page.specific, PersonalSpaceIndexPage):
+        # Pagina personala se crea pana acum doar la prima vizita pe site
+        # (/spatiul-meu/) - daca userul intra direct in admin (fara sa fi
+        # trecut pe site), nu avea inca nicio pagina de editat. O cream aici,
+        # la prima navigare in aceasta sectiune din admin, ca sa existe
+        # mereu, indiferent pe unde intra primul.
+        PersonalSpacePage.get_or_create_for_user(request.user)
+
+    return pages.filter(
+        Q(personalspacepage__isnull=True) | Q(personalspacepage__owner_user=request.user)
+    )
+
+
+@hooks.register("before_edit_page")
+def block_other_users_personal_space_edit(request, page):
+    """
+    A doua linie de aparare, in caz ca cineva acceseaza direct URL-ul de
+    editare al spatiului personal al altcuiva (nu doar prin listare) -
+    blocheaza accesul daca nu e proprietarul paginii sau superuser.
+    """
+    specific = page.specific
+    if not isinstance(specific, PersonalSpacePage):
+        return None
+
+    if request.user.is_superuser or specific.owner_user_id == request.user.id:
+        return None
+
+    return HttpResponseForbidden("Nu ai acces la spatiul personal al altui utilizator.")

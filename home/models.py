@@ -438,6 +438,13 @@ class PersonalSpacePage(RoutablePageMixin, Page):
     parent_page_types = ["home.PersonalSpaceIndexPage"]
     subpage_types = []
 
+    # Nu se creeaza manual din admin ("Add child page") - owner_user nu e in
+    # formular, deci ar crapa la salvare oricum. Se creeaza automat, o
+    # singura data per user, prin PersonalSpacePage.get_or_create_for_user()
+    # (apelata din ruta /spatiul-meu/). Asta nu blocheaza editarea/publicarea
+    # paginii deja create, doar ascunde butonul de adaugare manuala.
+    is_creatable = False
+
     def get_context(self, request):
         context = super().get_context(request)
         context["sections"] = self.sections.all()
