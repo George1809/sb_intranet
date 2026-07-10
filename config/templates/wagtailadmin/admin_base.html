@@ -1,0 +1,64 @@
+{% extends "wagtailadmin/admin_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <style>
+        .sb-admin-logo {
+            display: block;
+        }
+
+        .sb-admin-logo--sidebar {
+            width: 138px;
+            max-width: none;
+            transform: translateX(-16px);
+            transition: width 150ms ease, transform 150ms ease;
+        }
+
+        .sb-admin-logo__full,
+        .sb-admin-logo__mark {
+            display: block;
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .sb-admin-logo__mark {
+            display: none;
+        }
+
+        .sidebar--slim .sb-admin-logo--sidebar {
+            width: 34px;
+            max-width: 34px;
+            transform: translateX(0);
+            margin-inline: auto;
+        }
+
+        .sidebar--slim .sb-admin-logo--sidebar .sb-admin-logo__full {
+            display: none;
+        }
+
+        .sidebar--slim .sb-admin-logo--sidebar .sb-admin-logo__mark {
+            display: block;
+        }
+
+        .login-logo .sb-admin-logo {
+            width: 100%;
+            max-width: 150px;
+            margin: 0 auto;
+            transform: none;
+        }
+
+        .login-logo .sb-admin-logo__full {
+            display: block;
+        }
+
+        .login-logo .sb-admin-logo__mark {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block branding_favicon %}
+    <link rel="shortcut icon" href="{% static 'img/sb_mark_grey.svg' %}">
+{% endblock %}

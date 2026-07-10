@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<div class="page-shell manual-page-shell">
+
+    <div class="breadcrumbs">
+        <a href="{% pageurl page %}">Spatiul meu</a>
+        <span>/</span>
+        <span>{{ section.title }}</span>
+    </div>
+
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Sectiune personala</p>
+        <h1>{{ section.title }}</h1>
+        {% if section.description %}
+            <p class="page-intro">{{ section.description }}</p>
+        {% endif %}
+    </section>
+
+    {% if section.body %}
+        <section class="manual-content">
+            {% include "home/includes/stream_body.html" with body=section.body %}
+        </section>
+    {% else %}
+        <p class="empty-state">Aceasta sectiune nu are inca continut.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

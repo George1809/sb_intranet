@@ -10,52 +10,73 @@
     <section class="page-hero page-hero--compact">
         <p class="eyebrow">Intranet SmartBill</p>
         <h1>Cautare</h1>
+        <p class="page-intro">Cauta in toate sectiunile: pagini, documente, imagini, pagini manuale si linkuri.</p>
+
+        <form class="resource-search" role="search" method="get">
+            <label for="search-input">Cauta in tot intranetul</label>
+            <div class="resource-search__row">
+                <input id="search-input" type="search" name="query" value="{{ search_query }}" placeholder="Cauta dupa titlu">
+                <button type="submit" aria-label="Cauta">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="m21 20-4.9-4.9a8 8 0 1 0-1.4 1.4L19.6 21 21 20ZM4 10a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
     </section>
 
-    <form class="search-form" action="{% url 'search' %}" method="get">
-        <input type="text" name="query"{% if search_query %} value="{{ search_query }}"{% endif %} placeholder="Cauta in intranet">
-        <button type="submit">Cauta</button>
-    </form>
-
     {% if search_results %}
-        <div class="result-list">
-            {% for result in search_results %}
-                <a class="result-item" href="{% pageurl result %}">
-                    <strong>{{ result }}</strong>
-                    {% if result.search_description %}
-                        <span>{{ result.search_description }}</span>
-                    {% endif %}
-                </a>
-            {% endfor %}
-        </div>
+        <section class="resource-section">
+            <h2>{{ result_count }} rezultat{{ result_count|pluralize:"e" }} pentru &bdquo;{{ search_query }}&rdquo;</h2>
+
+            <div class="resource-list">
+                {% for item in search_results %}
+                    <a class="resource-button resource-button--{{ item.kind }}" href="{{ item.url }}" {% if item.new_tab %}target="_blank" rel="noopener"{% endif %}>
+                        <span class="resource-button__icon" aria-hidden="true">
+                            {% if item.kind == "page" %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M4 5a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v3H4V5Zm0 7h16v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7Z"/>
+                                </svg>
+                            {% elif item.kind == "image" %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm2 0v9.6l3.2-3.2 2.4 2.4 3.8-4.8L18 12.2V5H6Zm0 14h12v-3.5l-2.4-3-3.8 4.8-2.6-2.6L6 17.9V19Zm3-10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                </svg>
+                            {% elif item.kind == "manual" %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 3v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/>
+                                </svg>
+                            {% elif item.kind == "link" %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M10.6 13.4a1 1 0 0 1 0-1.4l3.6-3.6a3 3 0 1 1 4.2 4.2l-2.1 2.1 1.4 1.4 2.1-2.1a5 5 0 0 0-7.1-7.1l-3.5 3.6a3 3 0 0 0 0 4.2l1.4-1.3Zm2.8-2.8a1 1 0 0 1 0 1.4l-3.6 3.6a3 3 0 1 1-4.2-4.2l2.1-2.1-1.4-1.4-2.1 2.1a5 5 0 0 0 7.1 7.1l3.5-3.6a3 3 0 0 0 0-4.2l-1.4 1.3Z"/>
+                                </svg>
+                            {% else %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Zm0-8h4v2H8V8Z"/>
+                                </svg>
+                            {% endif %}
+                        </span>
+                        <span class="resource-button__content">
+                            <strong>{{ item.title }}</strong>
+                            <small>
+                                {% if item.kind == "page" %}{{ item.subtitle }}{% else %}In {{ item.subtitle }}{% endif %}
+                            </small>
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
 
         <div class="pagination">
             {% if search_results.has_previous %}
-                <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Anterior</a>
+                <a href="?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Anterior</a>
             {% endif %}
 
             {% if search_results.has_next %}
-                <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Urmator</a>
+                <a href="?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Urmator</a>
             {% endif %}
         </div>
     {% elif search_query %}
-        <p class="empty-state">Nu am gasit rezultate.</p>
+        <p class="empty-state">Nu am gasit rezultate pentru &bdquo;{{ search_query }}&rdquo;.</p>
     {% endif %}
 </div>
-{% endblock %}
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
-
-{% if search_results.has_previous %}
-<a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Previous</a>
-{% endif %}
-
-{% if search_results.has_next %}
-<a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Next</a>
-{% endif %}
-{% elif search_query %}
-No results found
-{% endif %}
 {% endblock %}

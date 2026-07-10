@@ -23,30 +23,88 @@
         {% endif %}
     </section>
 
-    {% if page.documents.all %}
-        <h2>Documente</h2>
+    {% if has_resources %}
+        <form class="resource-search" role="search" method="get">
+            <label for="resource-search-input">
+                {% if is_quick_links %}Cauta in linkuri rapide{% else %}Cauta in aceasta sectiune{% endif %}
+            </label>
+            <div class="resource-search__row">
+                <input id="resource-search-input" type="search" name="q" value="{{ resource_query }}" placeholder="{% if is_quick_links %}Cauta dupa titlu sau descriere{% else %}Cauta in resursele disponibile{% endif %}">
+                <button type="submit" aria-label="Cauta">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="m21 20-4.9-4.9a8 8 0 1 0-1.4 1.4L19.6 21 21 20ZM4 10a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    {% endif %}
 
-        <div class="card-grid">
-            {% for item in page.documents.all %}
-                {% if item.document %}
-                    <a class="content-card" href="{{ item.document.url }}" target="_blank" rel="noopener">
-                        <span>{{ item.title }}</span>
+    {% if resource_items %}
+        <section class="resource-section">
+            <h2>{% if is_quick_links %}Linkuri rapide{% else %}Resurse{% endif %}</h2>
+
+            <div class="resource-list">
+                {% for item in resource_items %}
+                    <a class="resource-button resource-button--{{ item.kind }}" href="{{ item.url }}" {% if item.new_tab %}target="_blank" rel="noopener"{% endif %}>
+                        <span class="resource-button__icon" aria-hidden="true">
+                            {% if item.kind == "image" %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm2 0v9.6l3.2-3.2 2.4 2.4 3.8-4.8L18 12.2V5H6Zm0 14h12v-3.5l-2.4-3-3.8 4.8-2.6-2.6L6 17.9V19Zm3-10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                </svg>
+                            {% elif item.kind == "manual" %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 3v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/>
+                                </svg>
+                            {% elif item.kind == "link" %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M10.6 13.4a1 1 0 0 1 0-1.4l3.6-3.6a3 3 0 1 1 4.2 4.2l-2.1 2.1 1.4 1.4 2.1-2.1a5 5 0 0 0-7.1-7.1l-3.5 3.6a3 3 0 0 0 0 4.2l1.4-1.3Zm2.8-2.8a1 1 0 0 1 0 1.4l-3.6 3.6a3 3 0 1 1-4.2-4.2l2.1-2.1-1.4-1.4-2.1 2.1a5 5 0 0 0 7.1 7.1l3.5-3.6a3 3 0 0 0 0-4.2l-1.4 1.3Z"/>
+                                </svg>
+                            {% else %}
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Zm0-8h4v2H8V8Z"/>
+                                </svg>
+                            {% endif %}
+                        </span>
+                        <span class="resource-button__content">
+                            <strong>{{ item.title }}</strong>
+                            <small>
+                                {% if item.created_at %}Adaugat {{ item.created_at|date:"d.m.Y H:i" }}{% endif %}
+                            </small>
+                        </span>
                     </a>
-                {% endif %}
-            {% endfor %}
-        </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% elif has_resources %}
+        <p class="empty-state">
+            {% if is_quick_links %}
+                Nu exista linkuri pentru cautarea curenta.
+            {% else %}
+                Nu exista resurse pentru cautarea curenta.
+            {% endif %}
+        </p>
     {% endif %}
 
     {% if children %}
-        <h2>Subsectiuni</h2>
+        <section class="resource-section">
+            <h2>Subsectiuni</h2>
 
-        <div class="card-grid">
-            {% for child in children %}
-                <a class="content-card" href="{% pageurl child %}">
-                    <span>{{ child.title }}</span>
-                </a>
-            {% endfor %}
-        </div>
+            <div class="section-card-grid">
+                {% for child in children %}
+                    <a class="section-card" href="{% pageurl child %}">
+                        <span class="section-card__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M4 5a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v3H4V5Zm0 7h16v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7Z"/>
+                            </svg>
+                        </span>
+                        <span class="section-card__content">
+                            <strong>{{ child.title }}</strong>
+                            <small>Deschide sectiunea</small>
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
     {% endif %}
 
 </div>

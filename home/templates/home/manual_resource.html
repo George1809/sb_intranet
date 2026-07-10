@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block content %}
+<div class="page-shell manual-page-shell">
+
+    <div class="breadcrumbs">
+        {% for ancestor in page.get_ancestors.live %}
+            {% if not ancestor.is_root %}
+                <a href="{% pageurl ancestor %}">{{ ancestor.title }}</a>
+                <span>/</span>
+            {% endif %}
+        {% endfor %}
+        <a href="{% pageurl page %}">{{ page.title }}</a>
+        <span>/</span>
+        <span>{{ manual_item.title }}</span>
+    </div>
+
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Pagina manuala</p>
+        <h1>{{ manual_item.title }}</h1>
+
+        {% if manual_item.description %}
+            <p class="page-intro">{{ manual_item.description }}</p>
+        {% endif %}
+    </section>
+
+    {% if manual_item.body %}
+        <section class="manual-content">
+            {% include "home/includes/stream_body.html" with body=manual_item.body %}
+        </section>
+    {% else %}
+        <p class="empty-state">Aceasta pagina manuala nu are continut inca.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

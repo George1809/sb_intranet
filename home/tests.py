@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+
 from home.models import HomePage
 
 from wagtail.models import Page, Site
@@ -33,10 +35,14 @@ class HomeTests(WagtailPageTestCase):
         Site.objects.create(hostname="testsite", root_page=root_page, is_default_site=True)
         self.homepage = HomePage(title="Home")
         root_page.add_child(instance=self.homepage)
+        self.user = get_user_model().objects.create_user(
+            username="intranet-tester", password="test-pass"
+        )
 
     def test_homepage_is_renderable(self):
-        self.assertPageIsRenderable(self.homepage)
+        self.assertPageIsRenderable(self.homepage, user=self.user)
 
     def test_homepage_template_used(self):
+        self.client.force_login(self.user)
         response = self.client.get(self.homepage.url)
         self.assertTemplateUsed(response, "home/home_page.html")

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block title %}Spatiul meu{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Cont personal</p>
+        <h1>Spatiul meu</h1>
+        <p class="page-intro">Sectiunile tale personale, completate din admin.</p>
+    </section>
+
+    {% if sections %}
+        <section class="resource-section">
+            <div class="resource-list">
+                {% for section in sections %}
+                    <a class="resource-button resource-button--manual" href="{{ section.url }}">
+                        <span class="resource-button__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 3v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/>
+                            </svg>
+                        </span>
+                        <span class="resource-button__content">
+                            <strong>{{ section.title }}</strong>
+                            <small>{{ section.description|default:"Deschide sectiunea" }}</small>
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% else %}
+        <div class="empty-panel">
+            <strong>Inca nu ai adaugat nicio sectiune</strong>
+            <span>Intra in admin si adauga prima sectiune in spatiul tau personal.</span>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

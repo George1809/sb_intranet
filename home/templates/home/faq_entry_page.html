@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<div class="page-shell">
+
+    <div class="breadcrumbs">
+        {% for ancestor in page.get_ancestors.live %}
+            {% if not ancestor.is_root %}
+                <a href="{% pageurl ancestor %}">{{ ancestor.title }}</a>
+                <span>/</span>
+            {% endif %}
+        {% endfor %}
+        <span>{{ page.title }}</span>
+    </div>
+
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Intrebare</p>
+        <h1>{{ page.title }}</h1>
+        <span class="faq-status {% if page.is_answered %}faq-status--answered{% else %}faq-status--pending{% endif %}">
+            {% if page.is_answered %}Raspuns oferit{% else %}In asteptare{% endif %}
+        </span>
+    </section>
+
+    {% if page.body %}
+        <section class="manual-content">
+            {% include "home/includes/stream_body.html" with body=page.body %}
+        </section>
+    {% else %}
+        <p class="empty-state">Aceasta intrebare nu are inca raspuns documentat.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

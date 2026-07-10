@@ -1,25 +1,68 @@
 {% extends "base.html" %}
-{% load wagtailcore_tags %}
+{% load static wagtailcore_tags %}
 
 {% block content %}
 <div class="page-shell">
-    <section class="page-hero">
-        <p class="eyebrow">Intranet SmartBill</p>
-        <h1>{{ page.title }}</h1>
+    <section class="page-hero page-hero--dashboard">
+        <div class="page-hero__content">
+            <p class="eyebrow">Intranet SmartBill</p>
+            <h1>Welcome</h1>
+            {% comment %}
+            Varianta cu nume:
+            <h1>Welcome, {{ request.user.get_full_name|default:request.user.username }}</h1>
+            {% endcomment %}
 
-        {% if page.intro %}
-            <p class="page-intro">{{ page.intro }}</p>
-        {% endif %}
+            {% if page.intro %}
+                <p class="page-intro">{{ page.intro }}</p>
+            {% else %}
+                <p class="page-intro">Acceseaza rapid traininguri, instrumente interne si resurse esentiale</p>
+            {% endif %}
+
+            <form class="hero-search" action="{% url 'search' %}" method="get">
+                <label for="hero-search-input">Cauta in intranet</label>
+                <div class="hero-search__row">
+                    <input id="hero-search-input" type="search" name="query" placeholder="Cauta proceduri, traininguri, resurse">
+                    <button type="submit">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                            <path d="m21 20-4.9-4.9a8 8 0 1 0-1.4 1.4L19.6 21 21 20ZM4 10a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/>
+                        </svg>
+                        Cauta
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+            <img src="{{ user_avatar_url }}" alt="">
+        </div>
+        {% comment %}
+        Varianta fara avatar in hero:
+        <div class="hero-visual hero-visual--plain" aria-hidden="true"></div>
+        {% endcomment %}
+
     </section>
 
-    <div class="card-grid">
-        {% for child in children %}
-            <a class="content-card" href="{% pageurl child %}">
-                <span>{{ child.title }}</span>
-            </a>
-        {% empty %}
-            <p class="empty-state">Nu exista pagini create.</p>
-        {% endfor %}
-    </div>
+    <section class="dashboard-section" aria-label="Resurse rapide">
+        <div class="card-grid dashboard-grid">
+            {% for child in dashboard_pages %}
+                <a class="content-card dashboard-card dashboard-card--{{ child.slug }}" href="{% pageurl child %}">
+                    <span class="dashboard-card__icon" aria-hidden="true">
+                        {% if child.title == "Training" %}
+                            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 2 8l10 5 8-4v6h2V8L12 3Zm-6 8.2V16c0 2 3 4 6 4s6-2 6-4v-4.8l-6 3-6-3Z"/></svg>
+                        {% elif child.title == "Release Notes" %}
+                            <svg viewBox="0 0 24 24" focusable="false"><path d="M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Zm0-8h4v2H8V8Z"/></svg>
+                        {% elif child.title == "Tools" %}
+                            <svg viewBox="0 0 24 24" focusable="false"><path d="M22 19.6 14.4 12A6.8 6.8 0 0 0 6 3.8l4.1 4.1-2.8 2.8L3.2 6.6A6.8 6.8 0 0 0 12 14.4l7.6 7.6 2.4-2.4Z"/></svg>
+                        {% else %}
+                            <svg viewBox="0 0 24 24" focusable="false"><path d="M10.6 13.4a1 1 0 0 1 0-1.4l3.6-3.6a3 3 0 1 1 4.2 4.2l-2.1 2.1 1.4 1.4 2.1-2.1a5 5 0 0 0-7.1-7.1l-3.5 3.6a3 3 0 0 0 0 4.2l1.4-1.3Zm2.8-2.8a1 1 0 0 1 0 1.4l-3.6 3.6a3 3 0 1 1-4.2-4.2l2.1-2.1-1.4-1.4-2.1 2.1a5 5 0 0 0 7.1 7.1l3.5-3.6a3 3 0 0 0 0-4.2l-1.4 1.3Z"/></svg>
+                        {% endif %}
+                    </span>
+                    <span class="dashboard-card__title">{{ child.title }}</span>
+                </a>
+            {% empty %}
+                <p class="empty-state">Nu exista inca paginile pentru dashboard.</p>
+            {% endfor %}
+        </div>
+    </section>
 </div>
 {% endblock %}
