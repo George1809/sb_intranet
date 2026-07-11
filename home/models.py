@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from modelcluster.fields import ParentalKey
@@ -124,8 +124,6 @@ class MenuPage(RoutablePageMixin, Page):
 
     subpage_types = [
         "home.MenuPage",
-        "home.ErrorIndexPage",
-        "home.FAQIndexPage",
     ]
 
     def get_context(self, request):
@@ -327,8 +325,9 @@ class ErrorIndexPage(Page):
         FieldPanel("intro"),
     ]
 
-    parent_page_types = ["home.HomePage", "home.MenuPage"]
+    parent_page_types = ["home.HomePage"]
     subpage_types = ["home.ErrorReportPage"]
+    max_count = 1
 
     def get_context(self, request):
         context = super().get_context(request)
@@ -372,8 +371,9 @@ class FAQIndexPage(Page):
         FieldPanel("intro"),
     ]
 
-    parent_page_types = ["home.HomePage", "home.MenuPage"]
+    parent_page_types = ["home.HomePage"]
     subpage_types = ["home.FAQEntryPage"]
+    max_count = 1
 
     def get_context(self, request):
         context = super().get_context(request)
@@ -419,6 +419,14 @@ class PersonalSpaceIndexPage(Page):
     subpage_types = ["home.PersonalSpacePage"]
     max_count = 1
 
+    def serve(self, request, *args, **kwargs):
+        # Nu are template propriu - nu e gandita sa fie vizitata direct (doar
+        # container pentru paginile individuale). Daca cineva ajunge totusi
+        # aici (ex. "View live" din admin), redirectioneaza spre spatiul
+        # personal al userului curent, la fel ca /spatiul-meu/.
+        page = PersonalSpacePage.get_or_create_for_user(request.user)
+        return redirect(page.url)
+
 
 class PersonalSpacePage(RoutablePageMixin, Page):
     owner_user = models.OneToOneField(
@@ -446,6 +454,15 @@ class PersonalSpacePage(RoutablePageMixin, Page):
     is_creatable = False
 
     def get_context(self, request):
+        # Hook-urile din wagtail_hooks.py izoleaza doar admin-ul (listare +
+        # editare) - randarea publica a paginii (aici) nu era acoperita, deci
+        # oricine logat putea citi spatiul altcuiva doar stiind/ghicind URL-ul
+        # (slug-ul e previzibil: spatiul-personal-<id>). Verificare directa
+        # aici, in loc de nativ Wagtail "Privacy", pentru ca restrictia
+        # trebuie sa fie "doar proprietarul", nu un grup fix.
+        if request.user != self.owner_user and not request.user.is_superuser:
+            raise Http404
+
         context = super().get_context(request)
         context["sections"] = self.sections.all()
         return context

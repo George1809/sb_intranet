@@ -5,6 +5,8 @@ from django.template.response import TemplateResponse
 from wagtail.models import Page
 
 from home.models import (
+    ErrorReportPage,
+    FAQEntryPage,
     MenuPageDocument,
     MenuPageImage,
     MenuPageLink,
@@ -31,17 +33,38 @@ def _page_results(search_query):
         .not_type(PersonalSpacePage, PersonalSpaceIndexPage)
         .search(search_query)
     )
-    return [
-        {
-            "kind": "page",
-            "title": result.title,
-            "subtitle": "Sectiune intranet",
-            "url": result.url,
-            "new_tab": False,
-        }
-        for result in pages
-        if result.url
-    ]
+
+    results = []
+    for base_result in pages:
+        if not base_result.url:
+            continue
+        result = base_result.specific
+
+        # Erorile si intrebarile sunt pagini Wagtail "adevarate" (spre
+        # deosebire de butoanele din meniuri, care sunt inregistrari
+        # separate) - fara asta, ar aparea in cautare ca "sectiuni", la fel
+        # ca meniurile, in loc de butoane cu iconita/eticheta lor proprie.
+        if isinstance(result, ErrorReportPage):
+            kind = "error"
+            subtitle = result.get_parent().title
+        elif isinstance(result, FAQEntryPage):
+            kind = "faq"
+            subtitle = result.get_parent().title
+        else:
+            kind = "page"
+            subtitle = "Sectiune intranet"
+
+        results.append(
+            {
+                "kind": kind,
+                "title": result.title,
+                "subtitle": subtitle,
+                "url": result.url,
+                "new_tab": False,
+            }
+        )
+
+    return results
 
 
 def _resource_results(search_query):

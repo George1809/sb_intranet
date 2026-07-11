@@ -458,7 +458,7 @@ svg {
 
 .page-hero--compact h1 {
     max-width: min(1180px, 100%);
-    font-size: clamp(38px, 5.2vw, 72px);
+    font-size: clamp(30px, 3.8vw, 46px);
 }
 
 .page-hero__content {
@@ -469,7 +469,7 @@ svg {
     margin: 0 0 9px;
     color: var(--green-800);
     font-size: 13px;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 0;
     text-transform: uppercase;
 }
@@ -483,8 +483,8 @@ h2 {
 
 h1 {
     max-width: min(1120px, 100%);
-    font-size: clamp(42px, 6vw, 78px);
-    font-weight: 900;
+    font-size: clamp(34px, 4.4vw, 56px);
+    font-weight: 700;
     overflow-wrap: anywhere;
 }
 
@@ -494,7 +494,7 @@ h1 {
 
 h2 {
     margin-top: 28px;
-    font-size: clamp(22px, 2.5vw, 30px);
+    font-size: clamp(19px, 2vw, 26px);
     overflow-wrap: anywhere;
 }
 
@@ -502,7 +502,7 @@ h2 {
     max-width: 650px;
     margin: 16px 0 0;
     color: #52675b;
-    font-size: clamp(17px, 1.6vw, 21px);
+    font-size: clamp(15px, 1.3vw, 18px);
     overflow-wrap: anywhere;
 }
 
@@ -516,7 +516,7 @@ h2 {
 .hero-search label {
     color: var(--green-900);
     font-size: 13px;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .hero-search__row {
@@ -611,8 +611,8 @@ h2 {
     border-radius: 50%;
     background: linear-gradient(135deg, var(--green-600), var(--mint-500));
     color: #ffffff;
-    font-size: clamp(42px, 6vw, 74px);
-    font-weight: 900;
+    font-size: clamp(34px, 4.5vw, 54px);
+    font-weight: 700;
     content: "SB";
 }
 
@@ -634,7 +634,7 @@ h2 {
 .resource-search label {
     color: var(--green-900);
     font-size: 13px;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .resource-search__row {
@@ -709,11 +709,11 @@ h2 {
 .section-card {
     position: relative;
     display: grid;
-    grid-template-columns: 54px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr);
     align-items: center;
     gap: 14px;
-    min-height: 126px;
-    padding: 18px;
+    min-height: 104px;
+    padding: 14px;
     overflow: hidden;
     border: 1px solid rgba(0, 104, 55, 0.13);
     border-radius: var(--radius);
@@ -746,16 +746,16 @@ h2 {
 .section-card__icon {
     display: grid;
     place-items: center;
-    width: 54px;
-    height: 54px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--radius);
     background: rgba(0, 146, 69, 0.12);
     color: var(--green-800);
 }
 
 .section-card__icon svg {
-    width: 28px;
-    height: 28px;
+    width: 23px;
+    height: 23px;
     fill: currentColor;
 }
 
@@ -776,24 +776,24 @@ h2 {
 
 .section-card__content strong {
     color: var(--ink);
-    font-size: clamp(17px, 1.4vw, 20px);
-    font-weight: 900;
+    font-size: clamp(15px, 1.2vw, 17px);
+    font-weight: 700;
 }
 
 .section-card__content small {
     color: var(--muted);
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 12.5px;
+    font-weight: 700;
 }
 
 .resource-button {
     position: relative;
     display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr);
     align-items: center;
     gap: 14px;
-    min-height: 78px;
-    padding: 12px 16px;
+    min-height: 62px;
+    padding: 9px 16px;
     overflow: hidden;
     border: 1px solid rgba(0, 104, 55, 0.13);
     border-radius: var(--radius);
@@ -827,8 +827,8 @@ h2 {
 .resource-button__icon {
     display: grid;
     place-items: center;
-    width: 56px;
-    height: 56px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--radius);
     background: rgba(0, 146, 69, 0.12);
     color: var(--green-800);
@@ -870,8 +870,8 @@ h2 {
 }
 
 .resource-button__icon svg {
-    width: 28px;
-    height: 28px;
+    width: 23px;
+    height: 23px;
     fill: currentColor;
 }
 
@@ -893,14 +893,14 @@ h2 {
 
 .resource-button__content strong {
     color: var(--ink);
-    font-size: clamp(16px, 1.4vw, 19px);
-    font-weight: 900;
+    font-size: clamp(15px, 1.2vw, 17px);
+    font-weight: 700;
 }
 
 .resource-button__content small {
     color: var(--muted);
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 12.5px;
+    font-weight: 700;
 }
 
 /* Manual resource pages and StreamField rendering */
@@ -926,6 +926,7 @@ h2 {
         linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 242, 0.9)),
         #ffffff;
     box-shadow: 0 10px 24px rgba(6, 61, 39, 0.06);
+    font-size: 15px;
 }
 
 .manual-richtext,
@@ -1050,13 +1051,13 @@ h2 {
 .content-card {
     display: flex;
     align-items: flex-end;
-    min-height: 132px;
-    padding: 18px;
+    min-height: 108px;
+    padding: 14px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--panel);
     color: var(--text);
-    font-weight: 900;
+    font-weight: 700;
     text-decoration: none;
     box-shadow: 0 8px 22px rgba(6, 61, 39, 0.06);
     transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
@@ -1071,10 +1072,10 @@ h2 {
 .dashboard-card {
     position: relative;
     display: grid;
-    grid-template-columns: 54px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr);
     align-items: center;
     gap: 14px;
-    min-height: 112px;
+    min-height: 100px;
     overflow: hidden;
     background:
         linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(238, 248, 240, 0.9)),
@@ -1095,16 +1096,16 @@ h2 {
 .dashboard-card__icon {
     display: grid;
     place-items: center;
-    width: 54px;
-    height: 54px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--radius);
     background: rgba(0, 146, 69, 0.11);
     color: var(--green-800);
 }
 
 .dashboard-card__icon svg {
-    width: 28px;
-    height: 28px;
+    width: 23px;
+    height: 23px;
     fill: currentColor;
 }
 
@@ -1112,7 +1113,7 @@ h2 {
     position: relative;
     z-index: 1;
     overflow-wrap: anywhere;
-    font-size: clamp(17px, 1.35vw, 20px);
+    font-size: clamp(15px, 1.2vw, 17px);
 }
 
 .dashboard-card--release-notes .dashboard-card__icon {
@@ -1564,7 +1565,7 @@ h2 {
     }
 
     h1 {
-        font-size: clamp(38px, 14vw, 58px);
+        font-size: clamp(30px, 11vw, 44px);
     }
 
     .dashboard-grid {
@@ -1576,18 +1577,18 @@ h2 {
     }
 
     .resource-button {
-        grid-template-columns: 48px minmax(0, 1fr);
-        min-height: 70px;
-        padding: 10px 12px;
+        grid-template-columns: 44px minmax(0, 1fr);
+        min-height: 58px;
+        padding: 8px 12px;
     }
 
     .resource-button__icon {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
     }
 
     .dashboard-card {
-        min-height: 104px;
+        min-height: 92px;
     }
 }
 
