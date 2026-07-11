@@ -88,3 +88,18 @@ def block_other_users_personal_space_edit(request, page):
         return None
 
     return HttpResponseForbidden("Nu ai acces la spatiul personal al altui utilizator.")
+
+
+@hooks.register("construct_main_menu")
+def hide_media_library_for_angajati(request, menu_items):
+    """
+    Angajatii pot tot adauga imagini/documente direct din blocurile de
+    continut (upload nou, la editarea unei pagini) - dar nu are sens sa
+    poata rasfoi din meniul principal toata biblioteca de imagini/documente,
+    unde ar vedea si fisierele incarcate de colegi. Moderators pastreaza
+    accesul complet la meniu, ca de obicei.
+    """
+    if request.user.is_superuser or not request.user.groups.filter(name="Angajati").exists():
+        return
+
+    menu_items[:] = [item for item in menu_items if item.name not in ("images", "documents")]
