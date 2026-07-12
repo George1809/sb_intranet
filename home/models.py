@@ -92,6 +92,7 @@ class HomePage(Page):
 class MenuPage(RoutablePageMixin, Page):
     intro = models.CharField(max_length=255, blank=True)
     quick_links_slug = "quick-links"
+    cazuri_intrebari_slug = "cazuri-intrebari"
 
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
@@ -132,6 +133,7 @@ class MenuPage(RoutablePageMixin, Page):
         resource_query = request.GET.get("q", "").strip()
         resource_items = []
         is_quick_links = self.slug == self.quick_links_slug
+        is_cazuri_intrebari = self.slug == self.cazuri_intrebari_slug
 
         if not is_quick_links:
             for item in self.documents.select_related("document").all():
@@ -197,10 +199,31 @@ class MenuPage(RoutablePageMixin, Page):
                 or query in item["subtitle"].casefold()
             ]
 
-        context["children"] = [] if is_quick_links else children
+        context["children"] = [] if (is_quick_links or is_cazuri_intrebari) else children
         context["is_quick_links"] = is_quick_links
+        context["is_cazuri_intrebari"] = is_cazuri_intrebari
         context["resource_query"] = resource_query
         context["resource_items"] = resource_items
+
+        if is_cazuri_intrebari:
+            error_index = next(
+                (c for c in children if isinstance(c, ErrorIndexPage)), None
+            )
+            faq_index = next(
+                (c for c in children if isinstance(c, FAQIndexPage)), None
+            )
+            context["error_index"] = error_index
+            context["faq_index"] = faq_index
+            context["error_categories"] = (
+                error_index.get_children().live().public().specific()  # type: ignore[attr-defined]
+                if error_index
+                else []
+            )
+            context["faq_categories"] = (
+                faq_index.get_children().live().public().specific()  # type: ignore[attr-defined]
+                if faq_index
+                else []
+            )
         if is_quick_links:
             context["has_resources"] = True
         else:
@@ -326,8 +349,30 @@ class ErrorIndexPage(Page):
     ]
 
     parent_page_types = ["home.HomePage"]
-    subpage_types = ["home.ErrorReportPage"]
+    subpage_types = ["home.ErrorCategoryPage"]
     max_count = 1
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        context["categories"] = (
+            self.get_children()
+            .type(ErrorCategoryPage)  # type: ignore[attr-defined]
+            .live()
+            .public()
+            .specific()
+        )
+        return context
+
+
+class ErrorCategoryPage(Page):
+    intro = models.CharField(max_length=255, blank=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("intro"),
+    ]
+
+    parent_page_types = ["home.ErrorIndexPage"]
+    subpage_types = ["home.ErrorReportPage"]
 
     def get_context(self, request):
         context = super().get_context(request)
@@ -360,7 +405,7 @@ class ErrorReportPage(Page):
         index.SearchField("body"),
     ]
 
-    parent_page_types = ["home.ErrorIndexPage"]
+    parent_page_types = ["home.ErrorCategoryPage"]
     subpage_types = []
 
 
@@ -372,8 +417,30 @@ class FAQIndexPage(Page):
     ]
 
     parent_page_types = ["home.HomePage"]
-    subpage_types = ["home.FAQEntryPage"]
+    subpage_types = ["home.FAQCategoryPage"]
     max_count = 1
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        context["categories"] = (
+            self.get_children()
+            .type(FAQCategoryPage)  # type: ignore[attr-defined]
+            .live()
+            .public()
+            .specific()
+        )
+        return context
+
+
+class FAQCategoryPage(Page):
+    intro = models.CharField(max_length=255, blank=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("intro"),
+    ]
+
+    parent_page_types = ["home.FAQIndexPage"]
+    subpage_types = ["home.FAQEntryPage"]
 
     def get_context(self, request):
         context = super().get_context(request)
@@ -405,7 +472,7 @@ class FAQEntryPage(Page):
         index.SearchField("body"),
     ]
 
-    parent_page_types = ["home.FAQIndexPage"]
+    parent_page_types = ["home.FAQCategoryPage"]
     subpage_types = []
 
 

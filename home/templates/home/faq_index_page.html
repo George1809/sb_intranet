@@ -22,31 +22,25 @@
         {% endif %}
     </section>
 
-    {% if entries %}
+    {% if categories %}
         <section class="resource-section">
-            <h2>Intrebari</h2>
-            <div class="resource-list">
-                {% for entry in entries %}
-                    <a class="resource-button resource-button--faq" href="{% pageurl entry %}">
-                        <span class="resource-button__icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" focusable="false">
-                                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm.9 15.5h-1.8v-1.8h1.8ZM14.7 10.3c-.4.5-1 1-1.6 1.4-.4.3-.6.6-.6 1.1v.4h-1.8v-.5c0-.9.4-1.5 1-2 .5-.4 1-.7 1.3-1.1a1.6 1.6 0 0 0 .3-1c0-1-.7-1.6-1.7-1.6-1 0-1.7.6-1.8 1.6H8.1c.1-2 1.6-3.3 3.7-3.3 2.1 0 3.6 1.2 3.6 3.1 0 .8-.3 1.4-.7 1.9Z"/>
-                            </svg>
+            <h2>Categorii</h2>
+            <div class="section-card-grid">
+                {% for category in categories %}
+                    <a class="section-card" href="{% pageurl category %}">
+                        <span class="section-card__icon" aria-hidden="true">
+                            {% include "home/includes/category_icon.html" with category=category %}
                         </span>
-                        <span class="resource-button__content">
-                            <strong>{{ entry.title }}</strong>
-                            <small>
-                                <span class="faq-status {% if entry.is_answered %}faq-status--answered{% else %}faq-status--pending{% endif %}">
-                                    {% if entry.is_answered %}Raspuns oferit{% else %}In asteptare{% endif %}
-                                </span>
-                            </small>
+                        <span class="section-card__content">
+                            <strong>{{ category.title }}</strong>
+                            <small>Deschide categoria</small>
                         </span>
                     </a>
                 {% endfor %}
             </div>
         </section>
     {% else %}
-        <p class="empty-state">Nu exista inca intrebari adaugate in aceasta sectiune.</p>
+        <p class="empty-state">Nu exista inca categorii adaugate.</p>
     {% endif %}
 
 </div>
