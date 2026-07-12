@@ -14,7 +14,7 @@ DASHBOARD_MENU_TITLES = {
 
 
 def main_menu(request):
-    fallback_avatar_url = static("img/sb_mark_grey.svg")
+    fallback_avatar_url = static("img/favi.png")
     user_avatar_url = fallback_avatar_url
     can_access_admin = False
 

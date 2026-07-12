@@ -22,27 +22,25 @@
         {% endif %}
     </section>
 
-    {% if entries %}
+    {% if categories %}
         <section class="resource-section">
-            <h2>Situatii documentate</h2>
-            <div class="resource-list">
-                {% for entry in entries %}
-                    <a class="resource-button resource-button--error" href="{% pageurl entry %}">
-                        <span class="resource-button__icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" focusable="false">
-                                <path d="M12 2 1 21h22L12 2Zm0 6a1 1 0 0 1 1 1v5a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1Zm0 9.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z"/>
-                            </svg>
+            <h2>Categorii</h2>
+            <div class="section-card-grid">
+                {% for category in categories %}
+                    <a class="section-card" href="{% pageurl category %}">
+                        <span class="section-card__icon" aria-hidden="true">
+                            {% include "home/includes/category_icon.html" with category=category %}
                         </span>
-                        <span class="resource-button__content">
-                            <strong>{{ entry.title }}</strong>
-                            <small>{{ entry.description|default:"Vezi detalii" }}</small>
+                        <span class="section-card__content">
+                            <strong>{{ category.title }}</strong>
+                            <small>Deschide categoria</small>
                         </span>
                     </a>
                 {% endfor %}
             </div>
         </section>
     {% else %}
-        <p class="empty-state">Nu exista inca situatii documentate in aceasta sectiune.</p>
+        <p class="empty-state">Nu exista inca categorii adaugate.</p>
     {% endif %}
 
 </div>
