@@ -327,3 +327,101 @@ adevărate (nu înregistrări separate ca butoanele din `MenuPage`), deci
 - Verificat direct: "Erori comune" (secțiunea însăși) → `page` / "Sectiune
   intranet"; intrările individuale → `error` / "In Erori comune". Teste
   4/4.
+
+## 2026-07-12 (Linux, acasă) — categorii Erori/Întrebări, redesign CSS
+
+### Fix — selector confuz la "Add child page"
+`ErrorIndexPage`/`FAQIndexPage` aveau `parent_page_types` incluzând orice
+`MenuPage`, fără `max_count` — apărea un selector de tip pagină și pe
+subsecțiuni fără legătură (ex. "test1"). Restrâns `parent_page_types` la
+`["home.HomePage"]` + `max_count = 1` pe ambele, scos din `subpage_types`
+al lui `MenuPage`. Verificat cu `can_create_at()`: Home → încă oferă
+tipurile; orice subsecțiune → doar `MenuPage`. Fără migrare (atribute
+Python, nu schema DB).
+
+### Adăugat — categorii la Erori comune și Întrebări
+Structură nouă, cerută de user: `Erori comune`/`Întrebări` → categorie →
+intrare (înainte era direct index → intrare).
+
+- Modele noi `ErrorCategoryPage`/`FAQCategoryPage` (migrații 0016-0017),
+  câte 4 categorii identice la fiecare: Gestiune-Facturare Cloud,
+  SmartBill POS, Conta, Integrari (redenumite ulterior din "SmartBill
+  Gestiune/Facturare Cloud"/"SmartBill Conta" — migrația 0018 — și cu `/`
+  → `-` în ultima, migrația 0019, ca să nu se confunde cu separatorul din
+  breadcrumb).
+- Pagina "Cazuri & Întrebări" arată acum direct, pe o singură pagină, 2
+  coloane (Erori/Întrebări) cu categoriile fiecăreia — fără click
+  suplimentar prin index — via context special în `MenuPage.get_context()`
+  (`is_cazuri_intrebari`, detectat după slug, ca la `is_quick_links`).
+- **Permisiuni Angajați — varianta A**: mutate de pe `ErrorIndexPage`/
+  `FAQIndexPage` (unde aveau add/change pe tot subarborele) pe fiecare
+  categorie în parte. Efect: pot adăuga intrări în categorii existente,
+  NU pot crea categorii noi (fiindcă n-au `add_page` la nivelul index-ului
+  unde s-ar crea o categorie). Verificat empiric cu Violeta: `can_add_subpage()`
+  True pe categorie, False pe index; `can_publish()` False (merge la
+  aprobare, ca înainte).
+- Discutat cu userul și clarificat: mecanismul de aprobare ("Submit for
+  moderation") e 100% default Wagtail (add fără publish + workflow activ),
+  nu ține de tipul paginii — ce a cerut model dedicat a fost forma
+  conținutului (StreamField + câmpuri proprii), nu fluxul de aprobare.
+- Templates noi: `error_category_page.html`/`faq_category_page.html`
+  (listează intrările, identic cu ce făceau înainte index-urile);
+  `error_index_page.html`/`faq_index_page.html` rescrise să arate grila de
+  categorii; `includes/category_icon.html` (icon comun, simplificat la
+  cererea userului la iconița-dosar unică, nu diferită per categorie, ca
+  să nu fie haotic).
+- Găsit temporar 4 intrări vechi de test rămase orfane direct sub index
+  (create înainte să existe categorii) — nu apăreau în noua listare pe
+  categorii, deși rămâneau live/accesibile pe URL. Userul le-a șters
+  manual din admin.
+
+### CSS — redesign in 3 variante, discutate și testate cu userul
+Sesiune lungă de iterații, ghidată de feedback vizual direct (userul se
+uita pe monitor și descria ce vede).
+
+- **Varianta 1** = starea comisă la `f51f789` (paleta multicoloră
+  originală: verde + lime/galben + mint/teal + albastru, decor generos).
+  Salvată ca reper numit în memoria persistentă a Claude Code (nu doar în
+  sesiune), cu instrucțiuni de revenire (`git checkout f51f789 -- ...`).
+- **Varianta 2** = trecere pe un singur accent (verde) peste tot — scoase
+  culorile decorative lime/mint/albastru din gradient-uri, iconițe pe tip,
+  păstrat roșu strict la erori/logout și galben la FAQ "în așteptare"
+  (semnal funcțional, nu decor). Nu s-a comis niciodată ca atare — salvată
+  separat, ca fișier, în memoria Claude Code (userul a refuzat explicit un
+  commit-checkpoint pentru ea), recuperabilă prin copiere peste fișierul
+  curent.
+- **Varianta 3** (păstrată, aplicată acum) = plecând de la Varianta 2:
+  mai mult alb (fundaluri simplificate), iconițe cu senzație de adâncime
+  (gradient + highlight + umbră, nu mai plate), carduri/butoane cu
+  border/umbră vizibile din stare normală (nu doar la hover), hover mai
+  pronunțat. Apoi, pe parcursul mai multor runde de feedback vizual:
+  formele decorative (bulă ovală + arc pe hero, cercuri pe carduri) au
+  fost înlocuite, testate și ajustate de câteva ori — starea finală
+  acceptată: hero cu o nuanță verde difuză mai pronunțată (fără formă cu
+  contur), cardurile/butoanele clicabile (secțiuni, categorii, tile-uri de
+  meniu, butoane de resurse) toate cu același semicerc verde discret în
+  colț, avatarul din hero cu inelul conic verde estompat (55% opacitate) și
+  spațiul alb intern original restaurat exact (tehnica `padding-box`/
+  `border-box` cu inset 12px, așa cum era, nu o versiune "reparată" care
+  schimba proporțiile).
+- Fix separat: umbra de sub navbar (sticky header) era prea mare/opacă
+  (36px blur, 24% opacitate) — redusă (10px blur, 14%).
+- Fix: iconița de întrebare (cerc cu semn de întrebare) de la Erori/
+  Întrebări nu era centrată corect — path SVG desenat de mână, ușor
+  asimetric. Înlocuit peste tot (coloana din "Cazuri & Întrebări",
+  `faq_category_page.html`, `search.html`) cu iconița standard Material
+  Design "help", verificată ca fiind simetrică.
+
+### Alte ajustări mici
+- Separator vizual (linie) pe pagina de schimbare parolă, între câmpul de
+  parolă veche și cele două de parolă nouă/confirmare.
+- Avatar fallback: folosește iconița de favicon (`img/favi.png`) în loc de
+  `sb_mark_grey.svg`, peste tot unde un user nu are poză de profil setată
+  (navbar + hero) — o singură schimbare în `context_processors.py`,
+  aplicată automat în ambele locuri.
+- Label-urile din formularul de login/parolă aliniate la greutatea de font
+  700 (erau rămase la 900 din varianta veche).
+
+Verificat la final: migrări curate, teste 4/4, toate cele 43 de pagini
+live randează OK (superuser), Violeta (Angajat) OK pe toate rutele
+relevante, anonim redirect corect la login, CSS static 200.
