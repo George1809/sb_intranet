@@ -57,7 +57,16 @@
                             <svg viewBox="0 0 24 24" focusable="false"><path d="M10.6 13.4a1 1 0 0 1 0-1.4l3.6-3.6a3 3 0 1 1 4.2 4.2l-2.1 2.1 1.4 1.4 2.1-2.1a5 5 0 0 0-7.1-7.1l-3.5 3.6a3 3 0 0 0 0 4.2l1.4-1.3Zm2.8-2.8a1 1 0 0 1 0 1.4l-3.6 3.6a3 3 0 1 1-4.2-4.2l2.1-2.1-1.4-1.4-2.1 2.1a5 5 0 0 0 7.1 7.1l3.5-3.6a3 3 0 0 0 0-4.2l-1.4 1.3Z"/></svg>
                         {% endif %}
                     </span>
-                    <span class="dashboard-card__title">{{ child.title }}</span>
+                    <span class="dashboard-card__content">
+                        <strong class="dashboard-card__title">{{ child.title }}</strong>
+                        <small class="dashboard-card__desc">
+                            {% if child.title == "Training" %}Materiale si sesiuni de training
+                            {% elif child.title == "Release Notes" %}Ce s-a schimbat recent in aplicatii
+                            {% elif child.title == "Tools" %}Instrumente si utilitare interne
+                            {% elif child.title == "Quick links" %}Cele mai folosite linkuri, la un click distanta
+                            {% endif %}
+                        </small>
+                    </span>
                 </a>
             {% empty %}
                 <p class="empty-state">Nu exista inca paginile pentru dashboard.</p>

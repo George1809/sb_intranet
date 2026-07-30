@@ -1,8 +1,10 @@
 from django.db.models import Q
 from django.http import HttpResponseForbidden
+from django.utils.html import escape
 
 from wagtail import hooks
 from wagtail.models import TaskState, WorkflowState
+from wagtail.rich_text import LinkHandler
 from wagtail.signals import (
     task_submitted,
     workflow_approved,
@@ -35,6 +37,29 @@ workflow_approved.disconnect(
     sender=WorkflowState,
     dispatch_uid="workflow_state_approved_email_notification",
 )
+
+
+class ExternalLinkInNewTabHandler(LinkHandler):
+    """
+    Wagtail nu inregistreaza niciun handler implicit pentru linkurile
+    "external" din RichText (cele adaugate ca text intr-un paragraf, cu
+    butonul de link din editor) - fara asta, ele raman <a href="..."> simplu,
+    fara target, deci se deschid in aceeasi pagina. Butoanele de resurse
+    (MenuPageLink etc.) au deja new_tab=True cablat separat in template,
+    doar linkurile din interiorul unui paragraf treceau pe langa asta.
+    """
+
+    identifier = "external"
+
+    @classmethod
+    def expand_db_attributes(cls, attrs):
+        href = escape(attrs["href"])
+        return f'<a href="{href}" target="_blank" rel="noopener noreferrer">'
+
+
+@hooks.register("register_rich_text_features")
+def register_external_link_new_tab(features):
+    features.register_link_type(ExternalLinkInNewTabHandler)
 
 
 @hooks.register("construct_reports_menu")
