@@ -3,6 +3,7 @@ from django.http import HttpResponseForbidden
 from django.utils.html import escape
 
 from wagtail import hooks
+from wagtail.documents.rich_text import DocumentLinkHandler
 from wagtail.models import TaskState, WorkflowState
 from wagtail.rich_text import LinkHandler
 from wagtail.signals import (
@@ -62,6 +63,35 @@ def register_external_link_new_tab(features):
     features.register_link_type(ExternalLinkInNewTabHandler)
 
 
+class DocumentLinkInNewTabHandler(DocumentLinkHandler):
+    """
+    La fel ca ExternalLinkInNewTabHandler, dar pentru linkurile catre
+    Documente alese din biblioteca (nu URL introdus manual) - handler-ul
+    implicit Wagtail (DocumentLinkHandler) rezolva doar href-ul catre fisier,
+    fara target, deci se deschideau in aceeasi pagina.
+    """
+
+    @classmethod
+    def expand_db_attributes_many(cls, attrs_list):
+        return [
+            tag[:-1] + ' target="_blank" rel="noopener noreferrer">'
+            if tag.startswith('<a href=')
+            else tag
+            for tag in super().expand_db_attributes_many(attrs_list)
+        ]
+
+
+@hooks.register("register_rich_text_features", order=100)
+def register_document_link_new_tab(features):
+    # order=100: hook-urile ruleaza sortate dupa "order", iar hook-ul propriu
+    # al lui wagtail.documents (care inregistreaza handler-ul implicit, fara
+    # target) ruleaza dupa "home" la order=0 implicit (INSTALLED_APPS il are
+    # dupa "home") si suprascrie orice inregistrare anterioara pe acelasi
+    # identifier ("document"). Cu order mare, hook-ul asta ruleaza ultimul si
+    # castiga suprascrierea.
+    features.register_link_type(DocumentLinkInNewTabHandler)
+
+
 @hooks.register("construct_reports_menu")
 def hide_reports_for_limited_users(request, menu_items):
     """
@@ -104,6 +134,25 @@ def block_other_users_personal_space_edit(request, page):
     A doua linie de aparare, in caz ca cineva acceseaza direct URL-ul de
     editare al spatiului personal al altcuiva (nu doar prin listare) -
     blocheaza accesul daca nu e proprietarul paginii sau superuser.
+    """
+    specific = page.specific
+    if not isinstance(specific, PersonalSpacePage):
+        return None
+
+    if request.user.is_superuser or specific.owner_user_id == request.user.id:
+        return None
+
+    return HttpResponseForbidden("Nu ai acces la spatiul personal al altui utilizator.")
+
+
+@hooks.register("before_delete_page")
+def block_other_users_personal_space_delete(request, page):
+    """
+    La fel ca block_other_users_personal_space_edit, dar pentru stergere -
+    permisiunile Wagtail (change_page + publish_page pe tot subarborele
+    "Spatii personale") fac ca can_delete() sa treaca fara nicio verificare
+    de proprietar, deci fara acest hook orice Angajat putea sterge spatiul
+    personal al oricui altcuiva, stiind doar ID-ul paginii.
     """
     specific = page.specific
     if not isinstance(specific, PersonalSpacePage):

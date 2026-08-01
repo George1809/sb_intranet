@@ -288,7 +288,7 @@ svg {
     background: transparent;
     color: var(--text);
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.15;
     text-align: left;
     text-decoration: none;
@@ -454,7 +454,7 @@ h2 {
 
 .hero-search label {
     color: var(--green-900);
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
 }
 
@@ -462,7 +462,7 @@ h2 {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
-    padding: 6px;
+    padding: 4px;
     border: 1px solid rgba(0, 104, 55, 0.16);
     border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.9);
@@ -474,10 +474,11 @@ h2 {
 .hero-search input {
     min-width: 0;
     min-height: 38px;
-    padding: 0 12px;
+    padding: 0 10px;
     border: 0;
     background: transparent;
     color: var(--text);
+    font-size: 14px;
     outline: 0;
 }
 
@@ -487,12 +488,13 @@ h2 {
     justify-content: center;
     gap: 7px;
     min-height: 38px;
-    padding: 0 16px;
+    padding: 0 14px;
     border: 0;
     border-radius: 7px;
     background: var(--green-800);
     color: #ffffff;
-    font-weight: 900;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
 }
 
@@ -572,7 +574,7 @@ h2 {
 
 .resource-search label {
     color: var(--green-900);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
 }
 
@@ -582,7 +584,7 @@ h2 {
     align-items: center;
     width: 100%;
     max-width: 680px;
-    padding: 6px;
+    padding: 3px;
     border: 1px solid rgba(0, 104, 55, 0.16);
     border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.92);
@@ -592,10 +594,11 @@ h2 {
 .resource-search input {
     min-width: 0;
     min-height: 38px;
-    padding: 0 12px;
+    padding: 0 11px;
     border: 0;
     background: transparent;
     color: var(--text);
+    font-size: 14px;
     outline: 0;
 }
 
@@ -694,7 +697,7 @@ h2 {
 }
 
 .category-column .section-card {
-    min-height: 128px;
+    min-height: 110px;
 }
 
 @media (max-width: 820px) {
@@ -707,11 +710,11 @@ h2 {
 .section-card {
     position: relative;
     display: grid;
-    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-columns: 42px minmax(0, 1fr);
     align-items: center;
     gap: 14px;
-    min-height: 104px;
-    padding: 14px;
+    min-height: 90px;
+    padding: 12px;
     overflow: hidden;
     border: 1px solid rgba(0, 104, 55, 0.2);
     border-radius: var(--radius);
@@ -726,10 +729,10 @@ h2 {
 
 .section-card::after {
     position: absolute;
-    right: -34px;
-    bottom: -44px;
-    width: 128px;
-    height: 128px;
+    right: -30px;
+    bottom: -38px;
+    width: 112px;
+    height: 112px;
     border-radius: 50%;
     background: rgba(0, 146, 69, 0.18);
     content: "";
@@ -744,8 +747,8 @@ h2 {
 .section-card__icon {
     display: grid;
     place-items: center;
-    width: 46px;
-    height: 46px;
+    width: 42px;
+    height: 42px;
     border-radius: var(--radius);
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(0, 146, 69, 0.18));
     color: var(--green-800);
@@ -756,8 +759,8 @@ h2 {
 }
 
 .section-card__icon svg {
-    width: 23px;
-    height: 23px;
+    width: 21px;
+    height: 21px;
     fill: currentColor;
 }
 
@@ -778,14 +781,14 @@ h2 {
 
 .section-card__content strong {
     color: var(--ink);
-    font-size: clamp(15px, 1.2vw, 17px);
+    font-size: clamp(14px, 1.15vw, 16px);
     font-weight: 700;
 }
 
 .section-card__content small {
     color: var(--muted);
-    font-size: 12.5px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .resource-button {
@@ -905,8 +908,8 @@ h2 {
 
 .resource-button__content small {
     color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 500;
 }
 
 /* Manual resource pages and StreamField rendering */
@@ -943,7 +946,6 @@ h2 {
 
 .manual-richtext p,
 .manual-richtext li {
-    max-width: 72ch;
     word-break: break-word;
 }
 
@@ -1139,8 +1141,8 @@ h2 {
     overflow: hidden;
     overflow-wrap: anywhere;
     color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .dashboard-card--release-notes .dashboard-card__icon {
@@ -1376,7 +1378,7 @@ h2 {
 .footer-links strong,
 .footer-user strong {
     display: block;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .footer-user {
@@ -1624,6 +1626,21 @@ h2 {
 
     .dashboard-card {
         min-height: 72px;
+    }
+
+    .section-card {
+        grid-template-columns: 38px minmax(0, 1fr);
+        min-height: 80px;
+        padding: 10px;
+    }
+
+    .section-card__icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .category-column .section-card {
+        min-height: 96px;
     }
 }
 
