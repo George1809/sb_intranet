@@ -11,8 +11,6 @@ from home.models import (
     MenuPageImage,
     MenuPageLink,
     MenuPageManualResource,
-    PersonalSpaceIndexPage,
-    PersonalSpacePage,
 )
 
 # To enable logging of search queries for use with the "Promoted search results" module
@@ -23,41 +21,57 @@ from home.models import (
 # from wagtail.contrib.search_promotions.models import Query
 
 
-def _page_results(search_query):
-    # Spatiile personale sunt private (fiecare user le vede doar pe ale lui
-    # in admin) - nu trebuie sa apara nici in cautarea globala, altfel un
-    # user ar putea gasi titlul spatiului altcuiva doar cautand un nume.
-    pages = (
+# Sectiuni de start (copii directi ai Home) excluse intentionat din cautare -
+# nu au butoane finale relevante de gasit prin cautare (Training e cadru de
+# curs, Tools sunt utilitare interne cu propria navigare), decizie explicita
+# a userului, nu regula generala.
+EXCLUDED_TOP_LEVEL_SLUGS = {"training", "tools"}
+
+
+def _in_excluded_section(page):
+    top_level = page.get_ancestors(inclusive=True).filter(depth=3).first()
+    return top_level is not None and top_level.slug in EXCLUDED_TOP_LEVEL_SLUGS
+
+
+def _location(page):
+    # Nume de sectiuni se pot repeta in locuri diferite (ex. "Proceduri" sub
+    # Vanzari SI sub Suport) - doar numele paginii-parinte nu e suficient ca
+    # sa distingi unde e de fapt rezultatul. path_prefix = tot lantul de
+    # deasupra (fara Home/root), location = pagina imediata (unde sta itemul).
+    ancestors = [
+        a.title for a in page.get_ancestors() if not a.is_root() and a.depth > 2
+    ]
+    return " / ".join(ancestors), page.title
+
+
+def _knowledge_base_results(search_query):
+    # Erorile si intrebarile sunt "butoane finale" din perspectiva userului
+    # (continut documentat, nu doar o sectiune de navigare), desi tehnic sunt
+    # pagini Wagtail adevarate, nu inregistrari MenuPageX - de aceea folosesc
+    # indexul de cautare Wagtail (title + description/body), nu un filtru
+    # icontains ca la resurse.
+    entries = (
         Page.objects.live()
         .public()
-        .not_type(PersonalSpacePage, PersonalSpaceIndexPage)
+        .type(ErrorReportPage, FAQEntryPage)
         .search(search_query)
     )
 
     results = []
-    for base_result in pages:
+    for base_result in entries:
         if not base_result.url:
             continue
         result = base_result.specific
+        if _in_excluded_section(result):
+            continue
 
-        # Erorile si intrebarile sunt pagini Wagtail "adevarate" (spre
-        # deosebire de butoanele din meniuri, care sunt inregistrari
-        # separate) - fara asta, ar aparea in cautare ca "sectiuni", la fel
-        # ca meniurile, in loc de butoane cu iconita/eticheta lor proprie.
-        if isinstance(result, ErrorReportPage):
-            kind = "error"
-            subtitle = result.get_parent().title
-        elif isinstance(result, FAQEntryPage):
-            kind = "faq"
-            subtitle = result.get_parent().title
-        else:
-            kind = "page"
-            subtitle = "Sectiune intranet"
-
+        kind = "error" if isinstance(result, ErrorReportPage) else "faq"
+        path_prefix, subtitle = _location(result.get_parent())
         results.append(
             {
                 "kind": kind,
                 "title": result.title,
+                "path_prefix": path_prefix,
                 "subtitle": subtitle,
                 "url": result.url,
                 "new_tab": False,
@@ -74,12 +88,14 @@ def _resource_results(search_query):
         title__icontains=search_query, page__live=True
     ).select_related("page", "document")
     for item in documents:
-        if item.document:
+        if item.document and not _in_excluded_section(item.page):
+            path_prefix, subtitle = _location(item.page)
             results.append(
                 {
                     "kind": "document",
                     "title": item.title,
-                    "subtitle": item.page.title,
+                    "path_prefix": path_prefix,
+                    "subtitle": subtitle,
                     "url": item.document.url,
                     "new_tab": True,
                 }
@@ -89,12 +105,14 @@ def _resource_results(search_query):
         title__icontains=search_query, page__live=True
     ).select_related("page", "image")
     for item in images:
-        if item.image:
+        if item.image and not _in_excluded_section(item.page):
+            path_prefix, subtitle = _location(item.page)
             results.append(
                 {
                     "kind": "image",
                     "title": item.title,
-                    "subtitle": item.page.title,
+                    "path_prefix": path_prefix,
+                    "subtitle": subtitle,
                     "url": item.image.file.url,
                     "new_tab": True,
                 }
@@ -106,11 +124,15 @@ def _resource_results(search_query):
         .select_related("page")
     )
     for item in manuals:
+        if _in_excluded_section(item.page):
+            continue
+        path_prefix, subtitle = _location(item.page)
         results.append(
             {
                 "kind": "manual",
                 "title": item.title,
-                "subtitle": item.page.title,
+                "path_prefix": path_prefix,
+                "subtitle": subtitle,
                 "url": item.url,
                 "new_tab": False,
             }
@@ -122,11 +144,15 @@ def _resource_results(search_query):
         .select_related("page")
     )
     for item in links:
+        if _in_excluded_section(item.page):
+            continue
+        path_prefix, subtitle = _location(item.page)
         results.append(
             {
                 "kind": "link",
                 "title": item.title,
-                "subtitle": item.page.title,
+                "path_prefix": path_prefix,
+                "subtitle": subtitle,
                 "url": item.url,
                 "new_tab": True,
             }
@@ -141,7 +167,7 @@ def search(request):
 
     all_results = []
     if search_query:
-        all_results = _page_results(search_query) + _resource_results(search_query)
+        all_results = _knowledge_base_results(search_query) + _resource_results(search_query)
 
     # Pagination
     paginator = Paginator(all_results, 10)

@@ -128,12 +128,14 @@ def hide_other_users_personal_spaces(parent_page, pages, request):
     )
 
 
-@hooks.register("before_edit_page")
-def block_other_users_personal_space_edit(request, page):
+def _forbid_unless_owner_or_superuser(request, page):
     """
-    A doua linie de aparare, in caz ca cineva acceseaza direct URL-ul de
-    editare al spatiului personal al altcuiva (nu doar prin listare) -
-    blocheaza accesul daca nu e proprietarul paginii sau superuser.
+    Verificare comuna, refolosita de toate hook-urile "before_*_page" de mai
+    jos: permisiunile Wagtail (change_page + publish_page) sunt acordate pe
+    tot subarborele "Spatii personale", nu per pagina - fara aceasta
+    verificare explicita, orice Angajat ar trece de can_edit()/can_delete()/
+    can_unpublish()/can_copy() pentru spatiul personal al oricui altcuiva,
+    stiind doar ID-ul paginii.
     """
     specific = page.specific
     if not isinstance(specific, PersonalSpacePage):
@@ -143,25 +145,31 @@ def block_other_users_personal_space_edit(request, page):
         return None
 
     return HttpResponseForbidden("Nu ai acces la spatiul personal al altui utilizator.")
+
+
+@hooks.register("before_edit_page")
+def block_other_users_personal_space_edit(request, page):
+    return _forbid_unless_owner_or_superuser(request, page)
 
 
 @hooks.register("before_delete_page")
 def block_other_users_personal_space_delete(request, page):
-    """
-    La fel ca block_other_users_personal_space_edit, dar pentru stergere -
-    permisiunile Wagtail (change_page + publish_page pe tot subarborele
-    "Spatii personale") fac ca can_delete() sa treaca fara nicio verificare
-    de proprietar, deci fara acest hook orice Angajat putea sterge spatiul
-    personal al oricui altcuiva, stiind doar ID-ul paginii.
-    """
-    specific = page.specific
-    if not isinstance(specific, PersonalSpacePage):
-        return None
+    return _forbid_unless_owner_or_superuser(request, page)
 
-    if request.user.is_superuser or specific.owner_user_id == request.user.id:
-        return None
 
-    return HttpResponseForbidden("Nu ai acces la spatiul personal al altui utilizator.")
+@hooks.register("before_unpublish_page")
+def block_other_users_personal_space_unpublish(request, page):
+    return _forbid_unless_owner_or_superuser(request, page)
+
+
+@hooks.register("before_copy_page")
+def block_other_users_personal_space_copy(request, page):
+    return _forbid_unless_owner_or_superuser(request, page)
+
+
+@hooks.register("before_move_page")
+def block_other_users_personal_space_move(request, page, destination):
+    return _forbid_unless_owner_or_superuser(request, page)
 
 
 @hooks.register("construct_main_menu")

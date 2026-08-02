@@ -10,7 +10,7 @@
     <section class="page-hero page-hero--compact">
         <p class="eyebrow">Intranet SmartBill</p>
         <h1>Cautare</h1>
-        <p class="page-intro">Cauta in toate sectiunile: pagini, documente, imagini, pagini manuale si linkuri.</p>
+        <p class="page-intro">Cauta in situatii documentate, intrebari, documente, imagini, pagini manuale si linkuri.</p>
 
         <form class="resource-search" role="search" method="get">
             <label for="search-input">Cauta in tot intranetul</label>
@@ -33,11 +33,7 @@
                 {% for item in search_results %}
                     <a class="resource-button resource-button--{{ item.kind }}" href="{{ item.url }}" {% if item.new_tab %}target="_blank" rel="noopener"{% endif %}>
                         <span class="resource-button__icon" aria-hidden="true">
-                            {% if item.kind == "page" %}
-                                <svg viewBox="0 0 24 24" focusable="false">
-                                    <path d="M4 5a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v3H4V5Zm0 7h16v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7Z"/>
-                                </svg>
-                            {% elif item.kind == "image" %}
+                            {% if item.kind == "image" %}
                                 <svg viewBox="0 0 24 24" focusable="false">
                                     <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm2 0v9.6l3.2-3.2 2.4 2.4 3.8-4.8L18 12.2V5H6Zm0 14h12v-3.5l-2.4-3-3.8 4.8-2.6-2.6L6 17.9V19Zm3-10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
                                 </svg>
@@ -66,7 +62,9 @@
                         <span class="resource-button__content">
                             <strong>{{ item.title }}</strong>
                             <small>
-                                {% if item.kind == "page" %}{{ item.subtitle }}{% else %}In {{ item.subtitle }}{% endif %}
+                                In
+                                {% if item.path_prefix %}<span class="resource-button__path">{{ item.path_prefix }} /</span>{% endif %}
+                                <span class="resource-button__location">{{ item.subtitle }}</span>
                             </small>
                         </span>
                     </a>
