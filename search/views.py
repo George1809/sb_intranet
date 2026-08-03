@@ -161,6 +161,32 @@ def _resource_results(search_query):
     return results
 
 
+def _pagination_window(current, total, neighbors=2):
+    """
+    Numerele de pagina de aratat explicit (plus None pt "..." intre goluri) -
+    fara asta, la multe pagini rezultate, s-ar afisa un buton per pagina
+    (ex. 30 de butoane intr-un rand). Pastreaza mereu prima, ultima, pagina
+    curenta si cateva vecine - restul se comprima la "...".
+    """
+    if total <= 7:
+        return list(range(1, total + 1))
+
+    pages = {1, total, current}
+    for offset in range(1, neighbors + 1):
+        pages.add(current - offset)
+        pages.add(current + offset)
+    pages = sorted(p for p in pages if 1 <= p <= total)
+
+    window = []
+    previous = None
+    for p in pages:
+        if previous is not None and p - previous > 1:
+            window.append(None)
+        window.append(p)
+        previous = p
+    return window
+
+
 def search(request):
     search_query = request.GET.get("query", "").strip()
     page = request.GET.get("page", 1)
@@ -185,5 +211,8 @@ def search(request):
             "search_query": search_query,
             "search_results": search_results,
             "result_count": len(all_results),
+            "pagination_window": _pagination_window(
+                search_results.number, paginator.num_pages
+            ),
         },
     )

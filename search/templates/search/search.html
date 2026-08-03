@@ -72,15 +72,29 @@
             </div>
         </section>
 
-        <div class="pagination">
+        <nav class="pagination" aria-label="Paginare rezultate">
             {% if search_results.has_previous %}
-                <a href="?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Anterior</a>
+                <a class="pagination__link" href="?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Anterior</a>
+            {% endif %}
+
+            {% if search_results.paginator.num_pages > 1 %}
+                <div class="pagination__pages">
+                    {% for num in pagination_window %}
+                        {% if not num %}
+                            <span class="pagination__ellipsis">&hellip;</span>
+                        {% elif num == search_results.number %}
+                            <span class="pagination__page pagination__page--active" aria-current="page">{{ num }}</span>
+                        {% else %}
+                            <a class="pagination__page" href="?query={{ search_query|urlencode }}&amp;page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             {% endif %}
 
             {% if search_results.has_next %}
-                <a href="?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Urmator</a>
+                <a class="pagination__link" href="?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Urmator</a>
             {% endif %}
-        </div>
+        </nav>
     {% elif search_query %}
         <p class="empty-state">Nu am gasit rezultate pentru &bdquo;{{ search_query }}&rdquo;.</p>
     {% endif %}
