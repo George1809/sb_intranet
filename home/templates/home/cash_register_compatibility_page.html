@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<div class="page-shell">
+
+    <div class="breadcrumbs">
+        {% for ancestor in page.get_ancestors.live %}
+            {% if not ancestor.is_root %}
+                <a href="{% pageurl ancestor %}">{{ ancestor.title }}</a>
+                <span>/</span>
+            {% endif %}
+        {% endfor %}
+        <span>{{ page.title }}</span>
+    </div>
+
+    <section class="page-hero page-hero--compact">
+        <p class="eyebrow">Compatibilitate</p>
+        <h1>{{ page.title }}</h1>
+        {% if page.intro %}
+            <p class="page-intro">{{ page.intro }}</p>
+        {% endif %}
+    </section>
+
+    {% if brands %}
+        <section class="resource-section">
+            <div class="compat-table-wrap">
+                <table class="compat-table">
+                    <thead>
+                        <tr>
+                            <th>Casa de marcat</th>
+                            <th>Model</th>
+                            <th>Cloud</th>
+                            <th>Cloud Android</th>
+                            <th>POS Windows</th>
+                            <th>POS Android</th>
+                            <th>Erori</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group in brands %}
+                            {% for row in group.rows %}
+                                <tr>
+                                    {% if forloop.first %}
+                                        <th scope="rowgroup" class="compat-table__brand" rowspan="{{ group.rows|length }}">{{ group.name }}</th>
+                                    {% endif %}
+                                    <td>{{ row.model_name }}</td>
+                                    <td>
+                                        <span class="compat-dot {% if row.compatible_cloud %}compat-dot--yes{% else %}compat-dot--no{% endif %}" aria-label="{% if row.compatible_cloud %}Compatibil{% else %}Incompatibil{% endif %}"></span>
+                                        {% if row.compatible_cloud and row.guide_cloud %}
+                                            <a class="compat-icon-btn compat-icon-btn--guide" href="{{ row.guide_cloud.url }}" target="_blank" rel="noopener" title="Ghid de configurare" aria-label="Ghid de configurare">
+                                                <svg viewBox="0 0 24 24" focusable="false">
+                                                    <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 3v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/>
+                                                </svg>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="compat-dot {% if row.compatible_cloud_android %}compat-dot--yes{% else %}compat-dot--no{% endif %}"></span>
+                                        {% if row.compatible_cloud_android and row.guide_cloud_android %}
+                                            <a class="compat-icon-btn compat-icon-btn--guide" href="{{ row.guide_cloud_android.url }}" target="_blank" rel="noopener" title="Ghid de configurare" aria-label="Ghid de configurare">
+                                                <svg viewBox="0 0 24 24" focusable="false">
+                                                    <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 3v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/>
+                                                </svg>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="compat-dot {% if row.compatible_pos_windows %}compat-dot--yes{% else %}compat-dot--no{% endif %}"></span>
+                                        {% if row.compatible_pos_windows and row.guide_pos_windows %}
+                                            <a class="compat-icon-btn compat-icon-btn--guide" href="{{ row.guide_pos_windows.url }}" target="_blank" rel="noopener" title="Ghid de configurare" aria-label="Ghid de configurare">
+                                                <svg viewBox="0 0 24 24" focusable="false">
+                                                    <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 3v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/>
+                                                </svg>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="compat-dot {% if row.compatible_pos_android %}compat-dot--yes{% else %}compat-dot--no{% endif %}"></span>
+                                        {% if row.compatible_pos_android and row.guide_pos_android %}
+                                            <a class="compat-icon-btn compat-icon-btn--guide" href="{{ row.guide_pos_android.url }}" target="_blank" rel="noopener" title="Ghid de configurare" aria-label="Ghid de configurare">
+                                                <svg viewBox="0 0 24 24" focusable="false">
+                                                    <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm1 3v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/>
+                                                </svg>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    {% if forloop.first %}
+                                        <td class="compat-table__errors" rowspan="{{ group.rows|length }}">
+                                            {% if group.errors_url %}
+                                                <a class="compat-icon-btn compat-icon-btn--errors" href="{{ group.errors_url }}" title="Erori comune" aria-label="Erori comune">
+                                                    <svg viewBox="0 0 24 24" focusable="false">
+                                                        <path d="M12 2 1 21h22L12 2Zm0 6a1 1 0 0 1 1 1v5a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1Zm0 9.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z"/>
+                                                    </svg>
+                                                    <span>Erori comune</span>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% else %}
+        <p class="empty-state">Nu exista inca case de marcat adaugate.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

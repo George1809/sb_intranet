@@ -74,7 +74,9 @@
 
         <nav class="pagination" aria-label="Paginare rezultate">
             {% if search_results.has_previous %}
-                <a class="pagination__link" href="?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Anterior</a>
+                <a class="pagination__link" href="?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}" aria-label="Pagina anterioara">
+                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                </a>
             {% endif %}
 
             {% if search_results.paginator.num_pages > 1 %}
@@ -92,7 +94,9 @@
             {% endif %}
 
             {% if search_results.has_next %}
-                <a class="pagination__link" href="?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Urmator</a>
+                <a class="pagination__link" href="?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}" aria-label="Pagina urmatoare">
+                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+                </a>
             {% endif %}
         </nav>
     {% elif search_query %}

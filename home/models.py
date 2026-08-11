@@ -24,7 +24,39 @@ from wagtail.search import index
 STREAM_BODY_BLOCKS = [
     ("heading", blocks.CharBlock(form_classname="title", icon="title")),
     ("paragraph", blocks.RichTextBlock(icon="pilcrow")),
-    ("image", ImageChooserBlock(icon="image")),
+    (
+        "image",
+        blocks.StructBlock(
+            [
+                ("image", ImageChooserBlock()),
+                (
+                    "size",
+                    blocks.ChoiceBlock(
+                        choices=[
+                            ("small", "Mic"),
+                            ("medium", "Mediu"),
+                            ("full", "Lat (toata coloana)"),
+                        ],
+                        default="medium",
+                        required=False,
+                    ),
+                ),
+                (
+                    "align",
+                    blocks.ChoiceBlock(
+                        choices=[
+                            ("left", "Stanga"),
+                            ("center", "Centru"),
+                            ("right", "Dreapta"),
+                        ],
+                        default="left",
+                        required=False,
+                    ),
+                ),
+            ],
+            icon="image",
+        ),
+    ),
     (
         "video",
         EmbedBlock(
@@ -64,6 +96,10 @@ class HomePage(Page):
         "Training",
         "Quick links",
     }
+    # MenuPage cu acest slug (creat manual din admin) e afisat ca ultim card,
+    # latit pe tot randul, in grila de dashboard - nu apare si in navbar
+    # (vezi excluderea din home/context_processors.py).
+    about_link_slug = "despre-smartbill"
 
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
@@ -86,6 +122,14 @@ class HomePage(Page):
         context["dashboard_pages"] = [
             child for child in children if child.title in self.dashboard_titles
         ]
+        context["about_link_page"] = next(
+            (
+                child
+                for child in children
+                if isinstance(child, MenuPage) and child.slug == self.about_link_slug
+            ),
+            None,
+        )
         return context
 
 
@@ -598,3 +642,112 @@ class PersonalSpaceSection(Orderable):
     @property
     def url(self):
         return f"{self.page.url}sectiune/{self.pk}/"
+
+
+class CashRegisterCompatibilityPage(Page):
+    intro = models.CharField(max_length=255, blank=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("intro"),
+        InlinePanel("compatibility_rows", label="Case de marcat"),
+    ]
+
+    parent_page_types = ["home.MenuPage"]
+    subpage_types = []
+    max_count = 1
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        rows = self.compatibility_rows.all()
+        brands = []
+        seen = set()
+        for row in rows:
+            if row.brand not in seen:
+                seen.add(row.brand)
+                brands.append(row.brand)
+        def first_errors_url(brand_rows):
+            return next((r.errors_url for r in brand_rows if r.errors_url), "")
+
+        context["brands"] = [
+            {
+                "name": brand,
+                "rows": [r for r in rows if r.brand == brand],
+                "errors_url": first_errors_url([r for r in rows if r.brand == brand]),
+            }
+            for brand in brands
+        ]
+        return context
+
+
+class CashRegisterModel(Orderable):
+    page = ParentalKey(
+        "home.CashRegisterCompatibilityPage",
+        on_delete=models.CASCADE,
+        related_name="compatibility_rows",
+    )
+
+    brand = models.CharField(max_length=100, verbose_name="Marca")
+    model_name = models.CharField(max_length=150, verbose_name="Model")
+
+    compatible_cloud = models.BooleanField(default=False, verbose_name="Cloud")
+    compatible_cloud_android = models.BooleanField(
+        default=False, verbose_name="Cloud Android"
+    )
+    compatible_pos_windows = models.BooleanField(
+        default=False, verbose_name="POS Windows"
+    )
+    compatible_pos_android = models.BooleanField(
+        default=False, verbose_name="POS Android"
+    )
+
+    guide_cloud = models.ForeignKey(
+        Document,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Ghid Cloud",
+    )
+    guide_cloud_android = models.ForeignKey(
+        Document,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Ghid Cloud Android",
+    )
+    guide_pos_windows = models.ForeignKey(
+        Document,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Ghid POS Windows",
+    )
+    guide_pos_android = models.ForeignKey(
+        Document,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Ghid POS Android",
+    )
+    errors_url = models.URLField(
+        blank=True,
+        verbose_name="Link erori comune",
+        help_text="URL-ul paginii cu erorile comune pentru aceasta marca (completat manual).",
+    )
+
+    panels = [
+        FieldPanel("brand"),
+        FieldPanel("model_name"),
+        FieldPanel("compatible_cloud"),
+        FieldPanel("guide_cloud"),
+        FieldPanel("compatible_cloud_android"),
+        FieldPanel("guide_cloud_android"),
+        FieldPanel("compatible_pos_windows"),
+        FieldPanel("guide_pos_windows"),
+        FieldPanel("compatible_pos_android"),
+        FieldPanel("guide_pos_android"),
+        FieldPanel("errors_url"),
+    ]

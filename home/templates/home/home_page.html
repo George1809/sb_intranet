@@ -71,6 +71,21 @@
             {% empty %}
                 <p class="empty-state">Nu exista inca paginile pentru dashboard.</p>
             {% endfor %}
+
+            {% if about_link_page %}
+                <a class="content-card dashboard-card dashboard-card--wide" href="{% pageurl about_link_page %}">
+                    <span class="dashboard-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false"><path d="M13 5l7 7-7 7-1.4-1.4L16.2 13H4v-2h12.2l-4.6-4.6L13 5Z"/></svg>
+                    </span>
+                    <span class="dashboard-card__content">
+                        <strong class="dashboard-card__title">{{ about_link_page.title }}</strong>
+                        <small class="dashboard-card__desc">{{ about_link_page.intro|default:"Regulament intern, beneficii si alte resurse utile" }}</small>
+                    </span>
+                    <svg class="dashboard-card__arrow" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M13 5l7 7-7 7-1.4-1.4L16.2 13H4v-2h12.2l-4.6-4.6L13 5Z"/>
+                    </svg>
+                </a>
+            {% endif %}
         </div>
     </section>
 </div>

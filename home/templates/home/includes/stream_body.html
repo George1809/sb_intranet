@@ -8,10 +8,16 @@
             {{ block.value|richtext }}
         </div>
     {% elif block.block_type == "image" %}
-        {% image block.value width-1200 as stream_image %}
-        <figure class="manual-image">
-            <img src="{{ stream_image.url }}" width="{{ stream_image.width }}" height="{{ stream_image.height }}" alt="{{ block.value.title }}">
-            <figcaption>{{ block.value.title }}</figcaption>
+        {% if block.value.size == "small" %}
+            {% image block.value.image max-360x360 as stream_image %}
+        {% elif block.value.size == "full" %}
+            {% image block.value.image max-1200x900 as stream_image %}
+        {% else %}
+            {% image block.value.image max-700x700 as stream_image %}
+        {% endif %}
+        <figure class="manual-image manual-image--{{ block.value.size|default:'medium' }} manual-image--align-{{ block.value.align|default:'left' }}">
+            <img src="{{ stream_image.url }}" width="{{ stream_image.width }}" height="{{ stream_image.height }}" alt="{{ block.value.image.title }}">
+            <figcaption>{{ block.value.image.title }}</figcaption>
         </figure>
     {% elif block.block_type == "video" %}
         <div class="manual-embed">

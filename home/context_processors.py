@@ -1,6 +1,6 @@
 from django.templatetags.static import static
 
-from home.models import PersonalSpaceIndexPage
+from home.models import HomePage, PersonalSpaceIndexPage
 
 from wagtail.models import Site
 
@@ -32,6 +32,7 @@ def main_menu(request):
             for page in root_page.get_children().live().specific()
             if page.title not in DASHBOARD_MENU_TITLES
             and not isinstance(page, PersonalSpaceIndexPage)
+            and page.slug != HomePage.about_link_slug
         ]
     else:
         pages = []
