@@ -4,40 +4,17 @@ from django.utils.html import escape
 
 from wagtail import hooks
 from wagtail.documents.rich_text import DocumentLinkHandler
-from wagtail.models import TaskState, WorkflowState
 from wagtail.rich_text import LinkHandler
-from wagtail.signals import (
-    task_submitted,
-    workflow_approved,
-    workflow_rejected,
-    workflow_submitted,
-)
 
 from home.models import PersonalSpaceIndexPage, PersonalSpacePage
 
-# Oprite temporar notificarile automate prin email la submit/aprobare/
-# respingere in workflow, cat timp testam manual fluxul de moderare.
-# De reactivat cand implementam corect linkurile din emailuri
-# (WAGTAILADMIN_BASE_URL) si continutul notificarilor.
-# Trebuie sa ruleze dupa ce wagtail.admin isi conecteaza propriile semnale
-# (se intampla la ready()); wagtail_hooks.py e importat mai tarziu, la prima
-# cautare de hook-uri, deci ordinea e garantata corecta.
-task_submitted.disconnect(
-    sender=TaskState,
-    dispatch_uid="group_approval_task_submitted_email_notification",
-)
-workflow_submitted.disconnect(
-    sender=WorkflowState,
-    dispatch_uid="workflow_state_submitted_email_notification",
-)
-workflow_rejected.disconnect(
-    sender=WorkflowState,
-    dispatch_uid="workflow_state_rejected_email_notification",
-)
-workflow_approved.disconnect(
-    sender=WorkflowState,
-    dispatch_uid="workflow_state_approved_email_notification",
-)
+
+# Wagtail cauta automat un fisier numit exact "wagtail_hooks.py" in fiecare
+# app instalata si il incarca singur - nu trebuie inregistrat nicaieri
+# manual. Fiecare functie de mai jos e legata (prin @hooks.register) de un
+# punct de extensie nativ Wagtail; ce face fiecare functie e insa cod
+# propriu, scris ca sa acopere lucruri pe care Wagtail nu le face din start
+# (linkuri in tab nou, izolarea spatiilor personale etc.).
 
 
 class ExternalLinkInNewTabHandler(LinkHandler):

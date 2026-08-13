@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('home', '0021_populare_case_de_marcat'),
+        ('home', '0020_cashregistercompatibilitypage_cashregistermodel'),
         ('wagtaildocs', '0014_alter_document_file_size'),
     ]
 

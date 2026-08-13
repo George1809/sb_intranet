@@ -1,0 +1,9 @@
+# Dependente directe (ce se importa efectiv in cod), nu tot ce se instaleaza.
+# requirements.txt e generat de aici cu `pip-compile requirements.in` (pachet
+# pip-tools, doar pentru dezvoltare - serverul foloseste direct
+# requirements.txt, nu ruleaza niciodata pip-compile). La actualizarea unei
+# versiuni, se schimba aici, apoi se regenereaza requirements.txt.
+wagtail==7.4.2
+psycopg[binary]==3.3.4
+python-dotenv==1.2.2
+gunicorn==26.0.0

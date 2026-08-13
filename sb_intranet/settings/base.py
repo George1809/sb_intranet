@@ -62,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "sb_intranet.middleware.IntranetLoginRequiredMiddleware",
     "sb_intranet.middleware.AdminPageSearchRestrictionMiddleware",
+    "sb_intranet.middleware.PersonalSpaceHistoryRestrictionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",

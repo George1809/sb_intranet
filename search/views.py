@@ -23,11 +23,13 @@ from home.models import (
 
 # Sectiuni de start (copii directi ai Home) excluse intentionat din cautare -
 # nu au butoane finale relevante de gasit prin cautare (Training e cadru de
-# curs, Tools sunt utilitare interne cu propria navigare), decizie explicita
+# curs, Tools sunt utilitare interne cu propria navigare, Despre SmartBill e
+# info generala de companie, nu continut operational), decizie explicita
 # a userului, nu regula generala.
-EXCLUDED_TOP_LEVEL_SLUGS = {"training", "tools"}
+EXCLUDED_TOP_LEVEL_SLUGS = {"training", "tools", "despre-smartbill"}
 
 
+# Spune daca o pagina sta undeva sub una din sectiunile excluse de mai sus.
 def _in_excluded_section(page):
     top_level = page.get_ancestors(inclusive=True).filter(depth=3).first()
     return top_level is not None and top_level.slug in EXCLUDED_TOP_LEVEL_SLUGS
@@ -81,6 +83,10 @@ def _knowledge_base_results(search_query):
     return results
 
 
+# Cauta prin butoanele de resurse (documente, imagini, linkuri, pagini
+# manuale) adaugate pe MenuPage - astea nu sunt pagini Wagtail, deci nu
+# intra in indexul de cautare de mai sus, se cauta separat, cu filtre
+# simple pe titlu/descriere.
 def _resource_results(search_query):
     results = []
 
@@ -187,6 +193,10 @@ def _pagination_window(current, total, neighbors=2):
     return window
 
 
+# View-ul paginii de cautare (nativ Django - o functie simpla care primeste
+# request-ul si intoarce raspunsul). Combina cele doua surse de rezultate
+# de mai sus (pagini + resurse) intr-o singura lista, apoi o pagineaza cu
+# Paginator-ul nativ Django.
 def search(request):
     search_query = request.GET.get("query", "").strip()
     page = request.GET.get("page", 1)

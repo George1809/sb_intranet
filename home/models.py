@@ -19,8 +19,7 @@ from wagtail.models import Orderable, Page
 from wagtail.search import index
 
 
-# Blocuri StreamField comune, refolosite de paginile manuale, erori,
-# intrebari si spatiul personal - un singur loc de intretinut.
+# Blocuri StreamField comune, refolosite de paginile manuale, erori, cazuri - intrebari si spatiul personal.
 STREAM_BODY_BLOCKS = [
     ("heading", blocks.CharBlock(form_classname="title", icon="title")),
     ("paragraph", blocks.RichTextBlock(icon="pilcrow")),
@@ -88,6 +87,7 @@ STREAM_BODY_BLOCKS = [
 ]
 
 
+# Pagina principala (Home) - are cardurile mari din dashboard si duce spre restul sectiunilor.
 class HomePage(Page):
     intro = models.CharField(max_length=255, blank=True)
     dashboard_titles = {
@@ -96,9 +96,7 @@ class HomePage(Page):
         "Training",
         "Quick links",
     }
-    # MenuPage cu acest slug (creat manual din admin) e afisat ca ultim card,
-    # latit pe tot randul, in grila de dashboard - nu apare si in navbar
-    # (vezi excluderea din home/context_processors.py).
+    # MenuPage cu acest slug (creat manual din admin) e afisat ca fiind latit pe tot randul, in grila de dashboard - nu apare si in navbar( conditie in home/context_processors.py).
     about_link_slug = "despre-smartbill"
 
     content_panels = Page.content_panels + [
@@ -133,6 +131,7 @@ class HomePage(Page):
         return context
 
 
+# Sablon general pentru orice submeniu/sectiune (Suport, Vanzari, Conta etc.) - arata butoane spre documente, imagini, pagini si linkuri.
 class MenuPage(RoutablePageMixin, Page):
     intro = models.CharField(max_length=255, blank=True)
     quick_links_slug = "quick-links"
@@ -295,6 +294,7 @@ class MenuPage(RoutablePageMixin, Page):
         return render(request, "home/manual_resource.html", context)
 
 
+# Un buton de pe un MenuPage, care duce spre un document/PDF incarcat.
 class MenuPageDocument(Orderable):
     page = ParentalKey(
         "home.MenuPage",
@@ -319,6 +319,7 @@ class MenuPageDocument(Orderable):
     ]
 
 
+# Un buton de pe un MenuPage, care duce spre o imagine incarcata.
 class MenuPageImage(Orderable):
     page = ParentalKey(
         "home.MenuPage",
@@ -343,6 +344,7 @@ class MenuPageImage(Orderable):
     ]
 
 
+# Un buton de pe un MenuPage, care duce spre o pagina scrisa direct in admin (text/imagini proprii), nu spre un fisier incarcat direct.
 class MenuPageManualResource(Orderable):
     page = ParentalKey(
         "home.MenuPage",
@@ -366,6 +368,7 @@ class MenuPageManualResource(Orderable):
         return f"{self.page.url}manual/{self.pk}/"
 
 
+# Un buton de pe un MenuPage, care duce spre un link extern.
 class MenuPageLink(Orderable):
     page = ParentalKey(
         "home.MenuPage",
@@ -385,6 +388,7 @@ class MenuPageLink(Orderable):
     ]
 
 
+# Pagina principala a sectiunii "Situatii sau erori comune" - listeaza categoriile de mai jos.
 class ErrorIndexPage(Page):
     intro = models.CharField(max_length=255, blank=True)
 
@@ -408,6 +412,7 @@ class ErrorIndexPage(Page):
         return context
 
 
+# O categorie de situatii - erori (cum ari fi Gestiune-Facturare, POS, etc.) - listeaza situatiile - erorile din ea.
 class ErrorCategoryPage(Page):
     intro = models.CharField(max_length=255, blank=True)
 
@@ -431,6 +436,7 @@ class ErrorCategoryPage(Page):
         return context
 
 
+# O eroare/situatie descrisa, cu explicatia si pasii de rezolvare.
 class ErrorReportPage(Page):
     description = models.CharField(
         max_length=255,
@@ -453,6 +459,7 @@ class ErrorReportPage(Page):
     subpage_types = []
 
 
+# Pagina principala a sectiunii "Intrebari" - listeaza categoriile de mai jos.
 class FAQIndexPage(Page):
     intro = models.CharField(max_length=255, blank=True)
 
@@ -476,6 +483,7 @@ class FAQIndexPage(Page):
         return context
 
 
+# O categorie de intrebari - listeaza intrebarile din ea.
 class FAQCategoryPage(Page):
     intro = models.CharField(max_length=255, blank=True)
 
@@ -499,6 +507,7 @@ class FAQCategoryPage(Page):
         return context
 
 
+# O intrebare, cu raspunsul ei.
 class FAQEntryPage(Page):
     body = StreamField(STREAM_BODY_BLOCKS, blank=True, use_json_field=True)
     is_answered = models.BooleanField(
@@ -539,6 +548,7 @@ class PersonalSpaceIndexPage(Page):
         return redirect(page.url)
 
 
+# Spatiul personal al unui singur angajat - doar el (si superuserii) il vede si il editeaza.
 class PersonalSpacePage(RoutablePageMixin, Page):
     owner_user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -556,12 +566,13 @@ class PersonalSpacePage(RoutablePageMixin, Page):
 
     parent_page_types = ["home.PersonalSpaceIndexPage"]
     subpage_types = []
-
-    # Nu se creeaza manual din admin ("Add child page") - owner_user nu e in
-    # formular, deci ar crapa la salvare oricum. Se creeaza automat, o
-    # singura data per user, prin PersonalSpacePage.get_or_create_for_user()
-    # (apelata din ruta /spatiul-meu/). Asta nu blocheaza editarea/publicarea
-    # paginii deja create, doar ascunde butonul de adaugare manuala.
+    """
+    Nu se creeaza manual din admin ("Add child page") - owner_user nu e in
+    formular, deci ar crapa la salvare oricum. Se creeaza automat, o
+    singura data per user, prin PersonalSpacePage.get_or_create_for_user()
+    (apelata din ruta /spatiul-meu/). Asta nu blocheaza editarea/publicarea
+    paginii deja create, doar ascunde butonul de adaugare manuala.
+    """
     is_creatable = False
 
     def get_context(self, request):
@@ -621,6 +632,7 @@ class PersonalSpacePage(RoutablePageMixin, Page):
         return page
 
 
+# O sectiune de continut din spatiul personal al unui angajat.
 class PersonalSpaceSection(Orderable):
     page = ParentalKey(
         "home.PersonalSpacePage",
@@ -644,6 +656,7 @@ class PersonalSpaceSection(Orderable):
         return f"{self.page.url}sectiune/{self.pk}/"
 
 
+# Pagina cu tabelul de compatibilitate case de marcat/imprimante fiscale.
 class CashRegisterCompatibilityPage(Page):
     intro = models.CharField(max_length=255, blank=True)
 
@@ -679,6 +692,7 @@ class CashRegisterCompatibilityPage(Page):
         return context
 
 
+# Un rand din tabelul de compatibilitate - un model de casa de marcat si cu ce e compatibil.
 class CashRegisterModel(Orderable):
     page = ParentalKey(
         "home.CashRegisterCompatibilityPage",
