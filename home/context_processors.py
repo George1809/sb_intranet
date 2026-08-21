@@ -5,8 +5,7 @@ from home.models import HomePage, PersonalSpaceIndexPage
 from wagtail.models import Site
 
 
-# Sectiunile astea apar doar ca si carduri pe dashboard (Home), nu si in
-# meniul de sus - ca sa nu fie duplicate.
+# Sectiuni tratate diferit, ca si carduri separate in index page, nu in navbar.
 DASHBOARD_MENU_TITLES = {
     "Release Notes",
     "Tools",
@@ -14,10 +13,7 @@ DASHBOARD_MENU_TITLES = {
     "Quick links",
 }
 
-
-# Context processor Django (nativ) - ruleaza automat la fiecare pagina si
-# pune datele de mai jos (meniu, poza user, drept de admin) disponibile in
-# orice template, fara sa le trimiti manual din fiecare view.
+# Context pentru navbar, avatar afisat pe orice pagina si optiune de acces admin, accesibila cam tuturor (depinde de permisiune si de login).
 def main_menu(request):
     fallback_avatar_url = static("img/favi.png")
     user_avatar_url = fallback_avatar_url

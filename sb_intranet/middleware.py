@@ -6,15 +6,12 @@ from django.shortcuts import redirect
 from django.urls import reverse
 
 
-# Middleware = mecanism nativ Django, cod care ruleaza pe fiecare cerere,
-# inainte sa ajunga la view-ul propriu-zis - util cand vrei o regula
-# valabila peste tot, nu doar intr-un loc. Cele 3 clase de mai jos sunt
-# inregistrate in sb_intranet/settings/base.py (lista MIDDLEWARE); fiecare
-# rezolva ceva ce Wagtail nu acopera din start (vezi docstring-ul fiecareia).
+# Cele 3 clase de mai jos sunt inregistrate in sb_intranet/settings/base.py (lista MIDDLEWARE). 
+# Fiecare rezolva ceva ce Wagtail nu acopera din start.
 class IntranetLoginRequiredMiddleware:
     """
-    Keep the public surface small: visitors must authenticate before they can
-    reach intranet pages, search, documents, or uploaded media.
+    Un vizitator neautentificat nu trebuie sa poata ajunge la nimic din intranet, 
+    nici pagini, nici cautare, nici documente sau media incarcata.
     """
 
     def __init__(self, get_response):
@@ -40,13 +37,11 @@ class IntranetLoginRequiredMiddleware:
 
 class AdminPageSearchRestrictionMiddleware:
     """
-    Cautarea globala de pagini din admin (/admin/pages/search/) foloseste
-    intern explorable_instances() din Wagtail, care nu stie de izolarea
-    spatiilor personale (hook-urile din home/wagtail_hooks.py) - un Angajat
-    ar putea gasi titlul spatiului personal al unui coleg acolo. Wagtail nu
-    ofera niciun hook/setare pentru a restrictiona vederea asta per grup,
-    deci o blocam direct la nivel de URL, doar pentru non-superuseri.
+    Cautarea globala de pagini din admin foloseste intern explorable_instances() din Wagtail, care nu stie de izolarea spatiilor personale 
+    (hook-urile din home/wagtail_hooks.py), un user ar putea gasi titlul spatiului personal al unui coleg acolo. 
+    Se blocheaza direct la nivel de URL pentru "Moderators" si "Users", nefiind disponibil un hook dedicat pentru asta.
     """
+
 
     RESTRICTED_PREFIX = "/admin/pages/search/"
 
@@ -63,14 +58,10 @@ class AdminPageSearchRestrictionMiddleware:
 
 class PersonalSpaceHistoryRestrictionMiddleware:
     """
-    Spre deosebire de edit/delete/unpublish/copy/move (blocate in
-    home/wagtail_hooks.py, via hook-urile before_*_page), Wagtail nu ruleaza
-    niciun hook pentru istoric, workflow history sau revizii - view-urile
-    alea verifica doar can_edit()/can_publish() generic, permisiune acordata
-    pe tot subarborele "Spatii personale". Fara asta, orice Angajat care
-    afla/ghiceste ID-ul paginii unui coleg ar putea vedea "View this
-    revision" (randeaza continutul integral al acelei versiuni) sau
-    diff-ul din "Compare revisions" pentru spatiul personal al altcuiva.
+    Spre deosebire de edit/delete/unpublish/copy/move, blocate deja in home/wagtail_hooks.py prin hook-urile before_*_page, 
+    Wagtail nu ruleaza niciun hook pentru istoric, workflow history sau revizii, verificandu-se doar can_edit()/can_publish().
+    Fara verificarea asta, orice user care ghiceste ID-ul paginii unui coleg ar putea vedea jurnalul de modificari (istoric/workflow),
+    dar ar putea vedea si continutul integral al unei versiuni vechi, prin "View this revision".
     """
 
     RESTRICTED_PATH = re.compile(

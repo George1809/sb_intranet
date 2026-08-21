@@ -27,7 +27,7 @@ def create_permissions(apps, schema_editor):
         PersonalSpaceIndexPage,
     )
 
-    # --- Pagini index FAQ/Erori, daca nu exista deja ---
+    # Pagini index FAQ/Cazuri/Erori, daca nu exista deja.
     cazuri = MenuPage.objects.filter(slug="cazuri-intrebari").first()
 
     faq_index = FAQIndexPage.objects.first()
@@ -44,7 +44,7 @@ def create_permissions(apps, schema_editor):
 
     personal_index = PersonalSpaceIndexPage.objects.first()
 
-    # --- Grup ---
+    # Grup.
     group, _ = Group.objects.get_or_create(name=GROUP_NAME)
 
     access_admin = Permission.objects.get(
@@ -64,11 +64,11 @@ def create_permissions(apps, schema_editor):
                     group=group, collection=collection, permission=permission
                 )
 
-    # --- Poze: doar in Collection-ul "Cazuri & intrebari", nimic altundeva ---
+    # Poze: doar in Collection-ul "Cazuri & intrebari".
     faq_collection = Collection.objects.filter(name=FAQ_ERROR_COLLECTION_NAME).first()
     grant_collection_permissions(faq_collection, "wagtailimages", ["add_image", "choose_image"])
 
-    # --- Spatiul personal: poze + video ca fisier (documente), doar in colectia lor ---
+    # Spatiul personal: poze + video ca fisier (documente), doar in colectia lor.
     root_collection = Collection.get_first_root_node()
     personal_collection = None
     if root_collection is not None:
@@ -85,7 +85,7 @@ def create_permissions(apps, schema_editor):
         personal_collection, "wagtaildocs", ["add_document", "choose_document"]
     )
 
-    # --- Pagini: FAQ/Erori -> pot crea/edita, NU pot publica (merge la aprobare) ---
+    # Pagini: FAQ/Cazuri/Erori -> pot crea/edita, nu pot publica (merge la aprobare).
     def grant_page_permissions(page, codenames):
         if page is None:
             return
@@ -101,10 +101,10 @@ def create_permissions(apps, schema_editor):
     grant_page_permissions(faq_index, ["add_page", "change_page"])
     grant_page_permissions(error_index, ["add_page", "change_page"])
 
-    # --- Spatiu personal: pot crea/edita SI publica (al lor, direct) ---
+    # Spatiu personal: pot crea/edita si publica (al lor, direct).
     grant_page_permissions(personal_index, ["add_page", "change_page", "publish_page"])
 
-    # --- Workflow de aprobare pentru FAQ/Erori, aprobat de grupul Moderators ---
+    # Workflow de aprobare pentru FAQ/Cazuri/Erori, aprobat de grupul Moderators.
     moderators = Group.objects.filter(name="Moderators").first()
     if moderators is not None and faq_index is not None and error_index is not None:
         workflow, created = Workflow.objects.get_or_create(name=WORKFLOW_NAME)
@@ -132,8 +132,7 @@ def remove_permissions(apps, schema_editor):
         workflow.delete()
 
     Group.objects.filter(name=GROUP_NAME).delete()
-    # Paginile FAQ/Erori si Collection-ul nu se sterg la reverse - sunt continut,
-    # nu configurare de permisiuni.
+    # Paginile FAQ/Cazuri/Erori si Collection-ul nu se sterg la reverse, sunt continut, nu configurare de permisiuni.
 
 
 class Migration(migrations.Migration):

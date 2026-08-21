@@ -14,13 +14,12 @@ def consolidate(apps, schema_editor):
 
     from home.models import ErrorIndexPage, FAQIndexPage
 
-    # --- Sterge grupurile "per-user" ramase de la sistemul vechi (orice
-    # grup care incepe cu "Spatiu personal - ") si cele 2 fixe ---
+    # De la grup separat per user ("Spatiu personal"), plus 2 grupuri fixe legate doar de Suport acum e un singur grup (de la "Angajati" la "Users" cum e acum).
     Group.objects.filter(name__startswith="Spatiu personal - ").delete()
     Group.objects.filter(name__in=OLD_GROUP_NAMES).delete()
 
-    # --- Sterge workflow-ul vechi (elibereaza legatura OneToOne cu paginile,
-    # ca sa poata fi preluata de workflow-ul corect de mai jos) ---
+    # Sters workflow-ul vechi (cel de Suport), o pagina poate fi legata doar de un singur workflow o data, nu poti avea 2 in acelasi timp.
+    # Pentru a se lega workflow-ul cel corect, trebuie intai scoasa legatura veche, ca sa fie loc pentru cea noua.
     old_workflow = Workflow.objects.filter(name=OLD_WORKFLOW_NAME).first()
     if old_workflow is not None:
         WorkflowPage.objects.filter(workflow=old_workflow).delete()
@@ -28,8 +27,7 @@ def consolidate(apps, schema_editor):
             workflow_task.task.delete()
         old_workflow.delete()
 
-    # --- Leaga corect workflow-ul "Aprobare Angajati" de paginile Erori/FAQ,
-    # acum ca sloturile OneToOne sunt libere ---
+    # Paginile Cazuri/Erori si FAQ se leaga de workflow-ul corect ("Aprobare Angajati"), folosit pentru toata lumea.
     new_workflow = Workflow.objects.filter(name=NEW_WORKFLOW_NAME).first()
     error_index = ErrorIndexPage.objects.first()
     faq_index = FAQIndexPage.objects.first()
@@ -42,8 +40,7 @@ def consolidate(apps, schema_editor):
 
 
 def reverse_consolidate(apps, schema_editor):
-    # Ireversibil intentionat - sistemul vechi (grupuri/workflow ad-hoc) nu
-    # se recreeaza la reverse, era oricum destinat sa fie inlocuit.
+    # Gol intentionat - daca cineva da reverse, sistemul vechi (sters mai sus) nu se recreeaza, oricum trebuia sa dispara definitiv.
     pass
 
 

@@ -50,9 +50,7 @@ def create_categories(apps, schema_editor):
     error_index = ErrorIndexPage.objects.first()
     faq_index = FAQIndexPage.objects.first()
 
-    # Angajatii nu mai primesc "add/change" direct pe index-uri - de acum
-    # incolo primesc doar pe fiecare categorie in parte (varianta A: pot
-    # adauga intrari, nu pot crea categorii noi).
+    # Userii nu mai primesc "add/change" direct pe index-uri, primesc doar pe fiecare categorie in parte (pot adauga intrari, nu pot crea categorii noi).
     revoke(error_index)
     revoke(faq_index)
 
@@ -114,10 +112,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("home", "0016_errorcategorypage_faqcategorypage"),
-        # Publicarea categoriilor declanseaza indexarea in cautare (add_child
-        # -> save -> semnal modelsearch) - fara aceasta dependenta explicita,
-        # migratia poate rula inaintea crearii tabelei wagtailsearch_indexentry
-        # pe o baza de date noua (ex. la teste).
+        # Publicarea categoriilor declanseaza indexarea in cautare (add_child -> save -> semnal modelsearch).
+        # Fara aceasta dependenta explicita, migratia poate rula inaintea crearii tabelei wagtailsearch_indexentry pe o baza de date noua.
         ("wagtailsearch", "0010_add_text_fields"),
     ]
 

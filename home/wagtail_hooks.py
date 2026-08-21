@@ -9,22 +9,16 @@ from wagtail.rich_text import LinkHandler
 from home.models import PersonalSpaceIndexPage, PersonalSpacePage
 
 
-# Wagtail cauta automat un fisier numit exact "wagtail_hooks.py" in fiecare
-# app instalata si il incarca singur - nu trebuie inregistrat nicaieri
-# manual. Fiecare functie de mai jos e legata (prin @hooks.register) de un
-# punct de extensie nativ Wagtail; ce face fiecare functie e insa cod
-# propriu, scris ca sa acopere lucruri pe care Wagtail nu le face din start
-# (linkuri in tab nou, izolarea spatiilor personale etc.).
+# Wagtail cauta automat orice fisier numit wagtail_hooks.py din orice app - nu trebuie inregistrat nicaieri, il gaseste singur la pornire.
+# Logica scrisa pentru chestii pe care Wagtail nu le poate face singur (linkuri in tab nou, ascundere meniuri admin dupa grup, izolare spatii personale).
 
 
 class ExternalLinkInNewTabHandler(LinkHandler):
     """
-    Wagtail nu inregistreaza niciun handler implicit pentru linkurile
-    "external" din RichText (cele adaugate ca text intr-un paragraf, cu
-    butonul de link din editor) - fara asta, ele raman <a href="..."> simplu,
-    fara target, deci se deschid in aceeasi pagina. Butoanele de resurse
-    (MenuPageLink etc.) au deja new_tab=True cablat separat in template,
-    doar linkurile din interiorul unui paragraf treceau pe langa asta.
+    Wagtail nu are ceva implicit pentru linkurile "external" din RichText (link-uri manuale din paragrafe), 
+    raman <a href="..."> simplu, fara target, deci se deschid tot in pagina curenta. 
+    Butoanele dedicate (MenuPageLink si blocuri de link-uri) au target="_blank" pus direct in template, 
+    dar linkurile din RichText nu trec prin template-ul ala, le randeaza Wagtail intern si de asta era nevoie de ceva separat pentru asta.
     """
 
     identifier = "external"
@@ -42,10 +36,7 @@ def register_external_link_new_tab(features):
 
 class DocumentLinkInNewTabHandler(DocumentLinkHandler):
     """
-    La fel ca ExternalLinkInNewTabHandler, dar pentru linkurile catre
-    Documente alese din biblioteca (nu URL introdus manual) - handler-ul
-    implicit Wagtail (DocumentLinkHandler) rezolva doar href-ul catre fisier,
-    fara target, deci se deschideau in aceeasi pagina.
+    Acelasi lucru ca mai sus, insa doar pentru documente adaugate in RichText. 
     """
 
     @classmethod
@@ -60,22 +51,18 @@ class DocumentLinkInNewTabHandler(DocumentLinkHandler):
 
 @hooks.register("register_rich_text_features", order=100)
 def register_document_link_new_tab(features):
-    # order=100: hook-urile ruleaza sortate dupa "order", iar hook-ul propriu
-    # al lui wagtail.documents (care inregistreaza handler-ul implicit, fara
-    # target) ruleaza dupa "home" la order=0 implicit (INSTALLED_APPS il are
-    # dupa "home") si suprascrie orice inregistrare anterioara pe acelasi
-    # identifier ("document"). Cu order mare, hook-ul asta ruleaza ultimul si
-    # castiga suprascrierea.
+    """
+    order=100 conventie wagtail hooks pentru a se suprascrie metoda si pentru a lua in calcul acest hook pentru deschidere link-uri cu documente in "target = _blank". 
+    Cu valoare 0, ar fi rulat ultimul hook-ul implicit wagtail si s-ar fi deschis in aceeasi pagina. Asa, orice e mai mare de 0, ia in calcul acest hook.
+    """
     features.register_link_type(DocumentLinkInNewTabHandler)
 
 
 @hooks.register("construct_reports_menu")
 def hide_reports_for_limited_users(request, menu_items):
     """
-    Rapoartele (Workflows, Site history, Aging pages etc.) sunt utile doar
-    pentru administratorii cu acces total - userii cu acces limitat nu au
-    nevoie de ele, deci le ascundem complet (meniul Reports dispare singur
-    daca ramane fara elemente).
+    Restrictie acces la meniul Reports (Workflows, Site history, Aging pages etc), nerelevant pentru Users si Moderators, 
+    doar superuserii il vad.
     """
     if not request.user.is_superuser:
         menu_items.clear()
@@ -84,20 +71,20 @@ def hide_reports_for_limited_users(request, menu_items):
 @hooks.register("construct_explorer_page_queryset")
 def hide_other_users_personal_spaces(parent_page, pages, request):
     """
-    In lista de pagini din admin, un user obisnuit trebuie sa vada doar
-    propriul spatiu personal, nu si pe ale colegilor - desi toate stau in
-    acelasi subarbore (Spatii personale), la care grupul "Angajati" are
-    acces. Superuserii vad tot, ca de obicei.
+    In lista de pagini din admin un user isi poate vedea doar paginile lui,
+    doar spatiul lui personal nu si al altor colegi, chiar daca toate stau
+    in acelasi meniu (Spatii personale), unde grupurile "Moderators" si
+    "Users" au acces.
     """
     if request.user.is_superuser:
         return pages
 
     if isinstance(parent_page.specific, PersonalSpaceIndexPage):
-        # Pagina personala se crea pana acum doar la prima vizita pe site
-        # (/spatiul-meu/) - daca userul intra direct in admin (fara sa fi
-        # trecut pe site), nu avea inca nicio pagina de editat. O cream aici,
-        # la prima navigare in aceasta sectiune din admin, ca sa existe
-        # mereu, indiferent pe unde intra primul.
+        # Pagina personala nu exista deloc in baza de date pana cand cineva nu intra in sectiunea "Spatii personale" din admin. 
+        # Se creeaza chiar in acel moment, la prima intrare. 
+        # Sectiunile din interior tot userul le adauga manual, separat, ca la orice MenuPage.
+
+
         PersonalSpacePage.get_or_create_for_user(request.user)
 
     return pages.filter(
@@ -107,13 +94,12 @@ def hide_other_users_personal_spaces(parent_page, pages, request):
 
 def _forbid_unless_owner_or_superuser(request, page):
     """
-    Verificare comuna, refolosita de toate hook-urile "before_*_page" de mai
-    jos: permisiunile Wagtail (change_page + publish_page) sunt acordate pe
-    tot subarborele "Spatii personale", nu per pagina - fara aceasta
-    verificare explicita, orice Angajat ar trece de can_edit()/can_delete()/
-    can_unpublish()/can_copy() pentru spatiul personal al oricui altcuiva,
-    stiind doar ID-ul paginii.
+    Functie comuna, o folosesc toate hook-urile "before_*_page" de mai jos. Permisiunile din Wagtail (change_page + publish_page) 
+    sunt date pe toata sectiunea "Spatii personale", nu pe pagina. Fara ea, orice user ar trece de can_edit()/can_delete()/can_unpublish()/can_copy() 
+    pentru spatiul personal al oricui altcuiva, doar stiind ID-ul paginii.
     """
+
+
     specific = page.specific
     if not isinstance(specific, PersonalSpacePage):
         return None
@@ -150,15 +136,14 @@ def block_other_users_personal_space_move(request, page, destination):
 
 
 @hooks.register("construct_main_menu")
-def hide_media_library_for_angajati(request, menu_items):
+def hide_media_library_for_users(request, menu_items):
     """
-    Angajatii pot tot adauga imagini/documente direct din blocurile de
-    continut (upload nou, la editarea unei pagini) - dar nu are sens sa
-    poata rasfoi din meniul principal toata biblioteca de imagini/documente,
-    unde ar vedea si fisierele incarcate de colegi. Moderators pastreaza
-    accesul complet la meniu, ca de obicei.
+    Userii pot adauga poze/documente noi, direct din blocurile de continut, cand editeaza o pagina, 
+    dar ascundem meniul principal din admin dedicat pentru asta, unde ar vedea si fisierele incarcate de colegi. 
+    Moderators raman cu acces complet la meniu.
     """
-    if request.user.is_superuser or not request.user.groups.filter(name="Angajati").exists():
+
+    if request.user.is_superuser or not request.user.groups.filter(name="Users").exists():
         return
 
     menu_items[:] = [item for item in menu_items if item.name not in ("images", "documents")]

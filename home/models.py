@@ -548,7 +548,7 @@ class PersonalSpaceIndexPage(Page):
         return redirect(page.url)
 
 
-# Spatiul personal al unui singur angajat - doar el (si superuserii) il vede si il editeaza.
+# Spatiul personal al unui singur user - doar el (si superuserii) il vede si il editeaza.
 class PersonalSpacePage(RoutablePageMixin, Page):
     owner_user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -632,7 +632,7 @@ class PersonalSpacePage(RoutablePageMixin, Page):
         return page
 
 
-# O sectiune de continut din spatiul personal al unui angajat.
+# O sectiune de continut din spatiul personal al unui user.
 class PersonalSpaceSection(Orderable):
     page = ParentalKey(
         "home.PersonalSpacePage",
